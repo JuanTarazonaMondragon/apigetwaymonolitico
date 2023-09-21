@@ -38,7 +38,7 @@ services:
     volumes:
       - './machinews/fastapi_app/app:/app'
     ports:
-      - '18015:${UVICORN_PORT}'
+      - '18016:${UVICORN_PORT}'
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
     networks:
@@ -53,7 +53,7 @@ services:
     volumes:
       - './orderws/fastapi_app/app:/app'
     ports:
-      - '18015:${UVICORN_PORT}'
+      - '18017:${UVICORN_PORT}'
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
     networks:
@@ -68,7 +68,7 @@ services:
     volumes:
       - './paymentws/fastapi_app/app:/app'
     ports:
-      - '18015:${UVICORN_PORT}'
+      - '18018:${UVICORN_PORT}'
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
     networks:
