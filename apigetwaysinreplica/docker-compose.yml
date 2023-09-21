@@ -1,0 +1,45 @@
+version: '3'
+services:
+  # Service Cliente
+  serviceclient:
+    image: macclb7httpclient-service1client
+    environment:
+      - UVICORN_PORT=${SERVICE_CLIENT_PORT}
+    networks:
+      - lb7_network
+
+  servicedelivery:
+    image: macclb7httpdelivery-service1delivery
+    environment:
+      - UVICORN_PORT=${SERVICE_DELIVERY_PORT}
+    networks:
+      - lb7_network
+
+  servicemachine:
+    image: macclb7httpmachine-service1machine
+    environment:
+      - UVICORN_PORT=${SERVICE_MACHINE_PORT}
+    networks:
+      - lb7_network
+
+  serviceorder:
+    image: macclb7httporder-service1order
+    environment:
+      - UVICORN_PORT=${SERVICE_ORDER_PORT}
+    networks:
+      - lb7_network
+
+  servicepayment:
+    image: macclb7httppayment-service1payment
+    environment:
+      - UVICORN_PORT=${SERVICE_PAYMENT_PORT}
+    networks:
+      - lb7_network
+
+networks:
+  lb7_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: '${NETWORK_SUBNET}'
