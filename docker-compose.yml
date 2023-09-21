@@ -2,7 +2,7 @@ version: '3'
 
 services:
   # Service Client
-  service-client:
+  client:
     hostname: client
     build: ./clientws/fastapi_app
     volumes:
@@ -12,12 +12,12 @@ services:
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
     networks:
-      lb7_network:
+      network:
         ipv4_address: '${SERVICE_CLIENT_IP}'
     restart: unless-stopped
 
   # Service Delivery
-  service-delivery:
+  delivery:
     hostname: delivery
     build: ./deliveryws/fastapi_app
     volumes:
@@ -27,12 +27,12 @@ services:
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
     networks:
-      lb7_network:
+      network:
         ipv4_address: '${SERVICE_DELIVERY_IP}'
     restart: unless-stopped
 
   # Service Machine
-  service-machine:
+  machine:
     hostname: machine
     build: ./machinews/fastapi_app
     volumes:
@@ -42,12 +42,12 @@ services:
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
     networks:
-      lb7_network:
+      network:
         ipv4_address: '${SERVICE_MACHINE_IP}'
     restart: unless-stopped
 
   # Service Order
-  service-order:
+  order:
     hostname: order
     build: ./orderws/fastapi_app
     volumes:
@@ -57,12 +57,12 @@ services:
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
     networks:
-      lb7_network:
+      network:
         ipv4_address: '${SERVICE_ORDER_IP}'
     restart: unless-stopped
 
   # Service Payment
-  service-payment:
+  payment:
     hostname: payment
     build: ./paymentws/fastapi_app
     volumes:
@@ -72,12 +72,41 @@ services:
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
     networks:
-      lb7_network:
+      network:
         ipv4_address: '${SERVICE_PAYMENT_IP}'
     restart: unless-stopped
 
+  haproxy:
+    hostname: haproxy
+    image: haproxy:2.6-alpine
+    ports:
+      - '${HAPROXY_PORT}:${HAPROXY_PORT}'
+      - '${HAPROXY_STATS_PORT}:${HAPROXY_STATS_PORT}'
+    expose:
+      - '${HAPROXY_PORT}'
+      - '${HAPROXY_STATS_PORT}'
+    networks:
+      network:
+        ipv4_address: '${HAPROXY_IP}'
+    environment:
+      - 'SERVICE_CLIENT_IP=${SERVICE_CLIENT_IP}'
+      - 'SERVICE_DELIVERY_IP=${SERVICE_DELIVERY_IP}'
+      - 'SERVICE_MACHINE_IP=${SERVICE_MACHINE_IP}'
+      - 'SERVICE_ORDER_IP=${SERVICE_ORDER_IP}'
+      - 'SERVICE_PAYMENT_IP=${SERVICE_PAYMENT_IP}'
+      - 'SERVICE_CLIENT_PORT=${UVICORN_PORT}'
+      - 'SERVICE_DELIVERY_PORT=${UVICORN_PORT}'
+      - 'SERVICE_MACHINE_PORT=${UVICORN_PORT}'
+      - 'SERVICE_ORDER_PORT=${UVICORN_PORT}'
+      - 'SERVICE_PAYMENT_PORT=${UVICORN_PORT}'
+      - 'HAPROXY_PORT=${HAPROXY_PORT}'
+      - 'HAPROXY_STATS_PORT=${HAPROXY_STATS_PORT}'
+    restart: unless-stopped
+    volumes:
+      - './apigateway/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg'
+
 networks:
-  lb7_network:
+  network:
     driver: bridge
     ipam:
       driver: default
