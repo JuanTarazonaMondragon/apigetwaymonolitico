@@ -1,0 +1,25 @@
+version: '3'
+services:
+  # Service Machine
+  service1machine:
+    hostname: machine
+    build: ./fastapi_app
+    volumes:
+      - './fastapi_app/app:/app'
+    ports:
+      - '18013:${UVICORN_PORT}'
+    environment:
+      - 'UVICORN_PORT=${UVICORN_PORT}'
+    networks:
+      lb7_network:
+        ipv4_address: '${SERVICE1_MACHINE_IP}'
+    restart: unless-stopped
+
+
+networks:
+  lb7_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: '${NETWORK_SUBNET}'
