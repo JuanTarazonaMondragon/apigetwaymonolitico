@@ -34,18 +34,17 @@ class BaseModel(Base):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
-class Client(BaseModel):
+class Payment(BaseModel):
     """order database table representation."""
     STATUS_CREATED = "Created"
     STATUS_FINISHED = "Finished"
 
     __tablename__ = "clients"
     id = Column(Integer, primary_key=True)
-    email = Column(TEXT, nullable=False)
-    username = Column(TEXT, nullable=False)
-    password = Column(TEXT, nullable=False, default="No description") 
+    id_client = Column(Integer, nullable=False)
+    deposit = Column(Integer, nullable=False)
 
     def as_dict(self):
-        """Return the order item as dict."""
+        """Return the payment item as dict."""
         dictionary = super().as_dict()
         return dictionary

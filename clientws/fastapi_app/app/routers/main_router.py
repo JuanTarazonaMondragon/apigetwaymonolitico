@@ -81,7 +81,7 @@ async def get_single_client(
         db: AsyncSession = Depends(get_db)
 ):
     """Retrieve single order by id"""
-    logger.debug("GET '/client/%i' endpoint called.", order_id)
+    logger.debug("GET '/client/%i' endpoint called.", client_id)
     client = await crud.get_client(db, client_id)
     if not client:
         raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Client {client_id} not found")
