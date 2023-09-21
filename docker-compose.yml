@@ -1,0 +1,85 @@
+version: '3'
+
+services:
+  # Service Client
+  service-client:
+    hostname: client
+    build: ./clientws/fastapi_app
+    volumes:
+      - './clientws/fastapi_app/app:/app'
+    ports:
+      - '18014:${UVICORN_PORT}'
+    environment:
+      - 'UVICORN_PORT=${UVICORN_PORT}'
+    networks:
+      lb7_network:
+        ipv4_address: '${SERVICE_CLIENT_IP}'
+    restart: unless-stopped
+
+  # Service Delivery
+  service-delivery:
+    hostname: delivery
+    build: ./deliveryws/fastapi_app
+    volumes:
+      - './deliveryws/fastapi_app/app:/app'
+    ports:
+      - '18015:${UVICORN_PORT}'
+    environment:
+      - 'UVICORN_PORT=${UVICORN_PORT}'
+    networks:
+      lb7_network:
+        ipv4_address: '${SERVICE_DELIVERY_IP}'
+    restart: unless-stopped
+
+  # Service Machine
+  service-machine:
+    hostname: machine
+    build: ./machinews/fastapi_app
+    volumes:
+      - './machinews/fastapi_app/app:/app'
+    ports:
+      - '18015:${UVICORN_PORT}'
+    environment:
+      - 'UVICORN_PORT=${UVICORN_PORT}'
+    networks:
+      lb7_network:
+        ipv4_address: '${SERVICE_MACHINE_IP}'
+    restart: unless-stopped
+
+  # Service Order
+  service-order:
+    hostname: order
+    build: ./orderws/fastapi_app
+    volumes:
+      - './orderws/fastapi_app/app:/app'
+    ports:
+      - '18015:${UVICORN_PORT}'
+    environment:
+      - 'UVICORN_PORT=${UVICORN_PORT}'
+    networks:
+      lb7_network:
+        ipv4_address: '${SERVICE_ORDER_IP}'
+    restart: unless-stopped
+
+  # Service Payment
+  service-payment:
+    hostname: payment
+    build: ./paymentws/fastapi_app
+    volumes:
+      - './paymentws/fastapi_app/app:/app'
+    ports:
+      - '18015:${UVICORN_PORT}'
+    environment:
+      - 'UVICORN_PORT=${UVICORN_PORT}'
+    networks:
+      lb7_network:
+        ipv4_address: '${SERVICE_PAYMENT_IP}'
+    restart: unless-stopped
+
+networks:
+  lb7_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: '${NETWORK_SUBNET}'
