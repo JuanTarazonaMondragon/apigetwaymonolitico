@@ -1,8 +1,3 @@
-dentro de cada carpeta de microservicio, hay directorios .idea
-que son? son necesarios o se pueden eliminar?
-
-dentro de cada webservice, sacar lo de dentro de la carpeta "fastapi" a la propia carpeta del directorio en caso de
-que los .idea sean inutiles
-
-QUITAR ACCESO A SERVICIOS DIRECTAMENTE MEDIANTE SUS PUERTOS DESDE EL BUSCADOR
-PARA QUE HAYA QUE USAR LA API PARA ACCEDER A ELLOS
+1. Imagenes de sobra, intentar no duplicar imagen de cada servicio. Crear imagen antes de servicio?
+2. Acceso a servicios mediante "localhost:service_port" o solo mediante API Gateway?
+3. POR QUE TARDA TANTO EN HACER DOWN? HACE KILL?

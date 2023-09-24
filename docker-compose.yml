@@ -2,78 +2,159 @@ version: '3'
 
 services:
   # Service Client
-  client:
-    hostname: client
+  client-r1:
+    hostname: client-r1
+    container_name: macc-microservicios-client-r1
     build: ./clientws/fastapi_app
+    #build:
+    #  context: ./clientws/fastapi_app
+    #  dockerfile: Dockerfile
+    #  args:
+    #    - IMAGE_NAME=macc-microservicios-client
     volumes:
       - './clientws/fastapi_app/app:/app'
+    ports:
+      - '18011:${UVICORN_PORT}'
+    environment:
+      - 'UVICORN_PORT=${UVICORN_PORT}'
+    networks:
+      network:
+        ipv4_address: '${SERVICE_CLIENT_R1_IP}'
+    restart: unless-stopped
+  client-r2:
+    hostname: client-r2
+    container_name: macc-microservicios-client-r2
+    build: ./clientws/fastapi_app
+    #image: macc-microservicios-client
+    volumes:
+      - './clientws/fastapi_app/app:/app'
+    ports:
+      - '18021:${UVICORN_PORT}'
+    environment:
+      - 'UVICORN_PORT=${UVICORN_PORT}'
+    networks:
+      network:
+        ipv4_address: '${SERVICE_CLIENT_R2_IP}'
+    restart: unless-stopped
+
+  # Service Delivery
+  delivery-r1:
+    hostname: delivery-r1
+    container_name: macc-microservicios-delivery-r1
+    build: ./deliveryws/fastapi_app
+    volumes:
+      - './deliveryws/fastapi_app/app:/app'
+    ports:
+      - '18012:${UVICORN_PORT}'
+    environment:
+      - 'UVICORN_PORT=${UVICORN_PORT}'
+    networks:
+      network:
+        ipv4_address: '${SERVICE_DELIVERY_R1_IP}'
+    restart: unless-stopped
+  delivery-r2:
+    hostname: delivery-r2
+    container_name: macc-microservicios-delivery-r2
+    build: ./deliveryws/fastapi_app
+    volumes:
+      - './deliveryws/fastapi_app/app:/app'
+    ports:
+      - '18022:${UVICORN_PORT}'
+    environment:
+      - 'UVICORN_PORT=${UVICORN_PORT}'
+    networks:
+      network:
+        ipv4_address: '${SERVICE_DELIVERY_R2_IP}'
+    restart: unless-stopped
+
+  # Service Machine
+  machine-r1:
+    hostname: machine-r1
+    container_name: macc-microservicios-machine-r1
+    build: ./machinews/fastapi_app
+    volumes:
+      - './machinews/fastapi_app/app:/app'
+    ports:
+      - '18013:${UVICORN_PORT}'
+    environment:
+      - 'UVICORN_PORT=${UVICORN_PORT}'
+    networks:
+      network:
+        ipv4_address: '${SERVICE_MACHINE_R1_IP}'
+    restart: unless-stopped
+  machine-r2:
+    hostname: machine-r2
+    container_name: macc-microservicios-machine-r2
+    build: ./machinews/fastapi_app
+    volumes:
+      - './machinews/fastapi_app/app:/app'
+    ports:
+      - '18023:${UVICORN_PORT}'
+    environment:
+      - 'UVICORN_PORT=${UVICORN_PORT}'
+    networks:
+      network:
+        ipv4_address: '${SERVICE_MACHINE_R2_IP}'
+    restart: unless-stopped
+
+  # Service Order
+  order-r1:
+    hostname: order-r1
+    container_name: macc-microservicios-order-r1
+    build: ./orderws/fastapi_app
+    volumes:
+      - './orderws/fastapi_app/app:/app'
     ports:
       - '18014:${UVICORN_PORT}'
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
     networks:
       network:
-        ipv4_address: '${SERVICE_CLIENT_IP}'
+        ipv4_address: '${SERVICE_ORDER_R1_IP}'
+    restart: unless-stopped
+  order-r2:
+    hostname: order-r2
+    container_name: macc-microservicios-order-r2
+    build: ./orderws/fastapi_app
+    volumes:
+      - './orderws/fastapi_app/app:/app'
+    ports:
+      - '18024:${UVICORN_PORT}'
+    environment:
+      - 'UVICORN_PORT=${UVICORN_PORT}'
+    networks:
+      network:
+        ipv4_address: '${SERVICE_ORDER_R2_IP}'
     restart: unless-stopped
 
-  # Service Delivery
-  delivery:
-    hostname: delivery
-    build: ./deliveryws/fastapi_app
+  # Service Payment
+  payment-r1:
+    hostname: payment-r1
+    container_name: macc-microservicios-payment-r1
+    build: ./paymentws/fastapi_app
     volumes:
-      - './deliveryws/fastapi_app/app:/app'
+      - './paymentws/fastapi_app/app:/app'
     ports:
       - '18015:${UVICORN_PORT}'
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
     networks:
       network:
-        ipv4_address: '${SERVICE_DELIVERY_IP}'
+        ipv4_address: '${SERVICE_PAYMENT_R1_IP}'
     restart: unless-stopped
-
-  # Service Machine
-  machine:
-    hostname: machine
-    build: ./machinews/fastapi_app
-    volumes:
-      - './machinews/fastapi_app/app:/app'
-    ports:
-      - '18016:${UVICORN_PORT}'
-    environment:
-      - 'UVICORN_PORT=${UVICORN_PORT}'
-    networks:
-      network:
-        ipv4_address: '${SERVICE_MACHINE_IP}'
-    restart: unless-stopped
-
-  # Service Order
-  order:
-    hostname: order
-    build: ./orderws/fastapi_app
-    volumes:
-      - './orderws/fastapi_app/app:/app'
-    ports:
-      - '18017:${UVICORN_PORT}'
-    environment:
-      - 'UVICORN_PORT=${UVICORN_PORT}'
-    networks:
-      network:
-        ipv4_address: '${SERVICE_ORDER_IP}'
-    restart: unless-stopped
-
-  # Service Payment
-  payment:
-    hostname: payment
+  payment-r2:
+    hostname: payment-r2
+    container_name: macc-microservicios-payment-r2
     build: ./paymentws/fastapi_app
     volumes:
       - './paymentws/fastapi_app/app:/app'
     ports:
-      - '18018:${UVICORN_PORT}'
+      - '18025:${UVICORN_PORT}'
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
     networks:
       network:
-        ipv4_address: '${SERVICE_PAYMENT_IP}'
+        ipv4_address: '${SERVICE_PAYMENT_R2_IP}'
     restart: unless-stopped
 
   haproxy:
@@ -89,16 +170,26 @@ services:
       network:
         ipv4_address: '${HAPROXY_IP}'
     environment:
-      - 'SERVICE_CLIENT_IP=${SERVICE_CLIENT_IP}'
-      - 'SERVICE_DELIVERY_IP=${SERVICE_DELIVERY_IP}'
-      - 'SERVICE_MACHINE_IP=${SERVICE_MACHINE_IP}'
-      - 'SERVICE_ORDER_IP=${SERVICE_ORDER_IP}'
-      - 'SERVICE_PAYMENT_IP=${SERVICE_PAYMENT_IP}'
-      - 'SERVICE_CLIENT_PORT=${UVICORN_PORT}'
-      - 'SERVICE_DELIVERY_PORT=${UVICORN_PORT}'
-      - 'SERVICE_MACHINE_PORT=${UVICORN_PORT}'
-      - 'SERVICE_ORDER_PORT=${UVICORN_PORT}'
-      - 'SERVICE_PAYMENT_PORT=${UVICORN_PORT}'
+      - 'SERVICE_CLIENT_R1_IP=${SERVICE_CLIENT_R1_IP}'
+      - 'SERVICE_CLIENT_R2_IP=${SERVICE_CLIENT_R2_IP}'
+      - 'SERVICE_DELIVERY_R1_IP=${SERVICE_DELIVERY_R1_IP}'
+      - 'SERVICE_DELIVERY_R2_IP=${SERVICE_DELIVERY_R2_IP}'
+      - 'SERVICE_MACHINE_R1_IP=${SERVICE_MACHINE_R1_IP}'
+      - 'SERVICE_MACHINE_R2_IP=${SERVICE_MACHINE_R2_IP}'
+      - 'SERVICE_ORDER_R1_IP=${SERVICE_ORDER_R1_IP}'
+      - 'SERVICE_ORDER_R2_IP=${SERVICE_ORDER_R2_IP}'
+      - 'SERVICE_PAYMENT_R1_IP=${SERVICE_PAYMENT_R1_IP}'
+      - 'SERVICE_PAYMENT_R2_IP=${SERVICE_PAYMENT_R2_IP}'
+      - 'SERVICE_CLIENT_R1_PORT=${UVICORN_PORT}'
+      - 'SERVICE_CLIENT_R2_PORT=${UVICORN_PORT}'
+      - 'SERVICE_DELIVERY_R1_PORT=${UVICORN_PORT}'
+      - 'SERVICE_DELIVERY_R2_PORT=${UVICORN_PORT}'
+      - 'SERVICE_MACHINE_R1_PORT=${UVICORN_PORT}'
+      - 'SERVICE_MACHINE_R2_PORT=${UVICORN_PORT}'
+      - 'SERVICE_ORDER_R1_PORT=${UVICORN_PORT}'
+      - 'SERVICE_ORDER_R2_PORT=${UVICORN_PORT}'
+      - 'SERVICE_PAYMENT_R1_PORT=${UVICORN_PORT}'
+      - 'SERVICE_PAYMENT_R2_PORT=${UVICORN_PORT}'
       - 'HAPROXY_PORT=${HAPROXY_PORT}'
       - 'HAPROXY_STATS_PORT=${HAPROXY_STATS_PORT}'
     restart: unless-stopped
