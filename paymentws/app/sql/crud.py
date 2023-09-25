@@ -44,25 +44,39 @@ async def delete_element_by_id(db: AsyncSession, model, element_id):
         await db.commit()
     return element
 
-# Client functions ##################################################################################
-async def get_client_list(db: AsyncSession):
-    """Load all the clients from the database."""
-    stmt = select(models.Client)
-    clients = await get_list_statement_result(db, stmt)
-    return clients
+# Payment functions ##################################################################################
+async def get_payments_list(db: AsyncSession):
+    """Load all the payments from the database."""
+    stmt = select(models.Payment)
+    payments = await get_list_statement_result(db, stmt)
+    return payments
 
-async def get_client(db: AsyncSession, client_id):
-    """Load a client from the database."""
-    return await get_element_by_id(db, models.Client, client_id)
+async def get_payment(db: AsyncSession, payment_id):
+    """Load a payment from the database."""
+    return await get_element_by_id(db, models.Payment, payment_id)
 
-async def create_client(db: AsyncSession, client):
-    """Persist a new client into the database."""
-    db_client = models.Client(
-        username=client.username,
-        email=client.email,
-        password=client.password,
+async def get_clients_payments(db: AsyncSession, client_id):
+    """Load all the payments from the database."""
+    stmt = select(models.Payment).where(models.Payment.id_client == client_id)
+    payments = await get_list_statement_result(db, stmt)
+    return payments
+
+async def create_payment(db: AsyncSession, payment):
+    """Persist a new payment into the database."""
+    """Check if the client has enough balance for the payment, else return False"""
+    payment_movement_float = float(payment.movement)
+    if payment_movement_float < 0:
+        clients_payments_list = await get_clients_payments(db, payment.id_client)
+        client_balance = 0
+        for client_payment in clients_payments_list:
+            client_balance += client_payment.movement
+        if (payment_movement_float + client_balance) < 0:
+            raise Exception("Insufficient balance.")
+    db_payment = models.Payment(
+        id_client=payment.id_client,
+        movement=payment_movement_float
     )
-    db.add(db_client)
+    db.add(db_payment)
     await db.commit()
-    await db.refresh(db_client)
-    return db_client
+    await db.refresh(db_payment)
+    return db_payment

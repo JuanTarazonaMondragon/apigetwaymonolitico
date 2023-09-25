@@ -1,2 +1,8 @@
 Acceso a servicios mediante "localhost:service_port" o solo mediante API Gateway?
-POR QUE TARDA TANTO EN HACER DOWN? HACE KILL?
+
+DESCOMENTAR DATETIME
+
+payment positive desde cliente y negative desde orders para que un cliente no haga negativo y viceversa?
+datetime revisar
+
+subir .db a git?

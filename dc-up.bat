@@ -1,4 +1,4 @@
-docker-compose down
+docker-compose kill
 
 docker rmi macc-microservicios-client
 docker rmi macc-microservicios-delivery

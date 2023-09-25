@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """Database models definitions. Table representations as class."""
-from sqlalchemy import Column, DateTime, Integer, String, TEXT, ForeignKey
+from sqlalchemy import Column, DateTime, Integer, String, TEXT, ForeignKey, Float
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
+#from datetime import datetime
 
 class BaseModel(Base):
     """Base database table representation to reuse."""
@@ -32,19 +33,19 @@ class BaseModel(Base):
         """Return the item as dict."""
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
-class Client(BaseModel):
-    """Client database table representation."""
+class Payment(BaseModel):
+    """Payments database table representation."""
     STATUS_CREATED = "Created"
     STATUS_FINISHED = "Finished"
 
-    __tablename__ = "clients"
-    id_client = Column(Integer, primary_key=True)
-    email = Column(TEXT, nullable=False)
-    username = Column(TEXT, nullable=False)
-    password = Column(TEXT, nullable=False, default="No description")
+    __tablename__ = "payment"
+    id_payment = Column(Integer, primary_key=True)
+    id_client = Column(Integer, nullable=False)
+    movement = Column(Float, nullable=False)
+    #date = Column(DateTime(timezone=True), default=datetime.utcnow)
 
     def as_dict(self):
-        """Return the client item as dict."""
+        """Return the payment item as dict."""
         dictionary = super().as_dict()
-        dictionary['client'] = [i.as_dict() for i in self.pieces]
+        dictionary['payment'] = [i.as_dict() for i in self.pieces]
         return dictionary

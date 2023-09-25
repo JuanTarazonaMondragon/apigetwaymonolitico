@@ -200,6 +200,15 @@ services:
     volumes:
       - './apigateway/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg'
 
+  #rabbitmq:
+  #  image: "rabbitmq:3-management"
+  #  ports:
+  #    - "15672:15672"  # Port for RabbitMQ web UI
+  #    - "5672:5672"    # Port for RabbitMQ service
+  #  environment:
+  #    RABBITMQ_DEFAULT_USER: user
+  #    RABBITMQ_DEFAULT_PASS: user
+
 networks:
   network:
     driver: bridge
