@@ -1,3 +1,2 @@
-1. Imagenes de sobra, intentar no duplicar imagen de cada servicio. Crear imagen antes de servicio?
-2. Acceso a servicios mediante "localhost:service_port" o solo mediante API Gateway?
-3. POR QUE TARDA TANTO EN HACER DOWN? HACE KILL?
+Acceso a servicios mediante "localhost:service_port" o solo mediante API Gateway?
+POR QUE TARDA TANTO EN HACER DOWN? HACE KILL?
