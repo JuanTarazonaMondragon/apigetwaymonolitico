@@ -6,3 +6,11 @@ payment positive desde cliente y negative desde orders para que un cliente no ha
 datetime revisar
 
 subir .db a git?
+
+actualizar client en un futuro?
+
+CREATE DATE en payment list? en clients payment list nos sale
+
+REFORMAT FILES, DOBLE ENTERS
+
+---- AL HACER UPDATE, SE ACTUALIZA, PERO CUANDO LE PEDIMOS QUE NOS DEVUELVA LA INFO NO NOS LA MUESTRA ACTUALIZADA

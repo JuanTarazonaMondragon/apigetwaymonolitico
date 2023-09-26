@@ -4,7 +4,9 @@ from sqlalchemy import Column, DateTime, Integer, String, TEXT, ForeignKey, Floa
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
-#from datetime import datetime
+
+
+# from datetime import datetime
 
 class BaseModel(Base):
     """Base database table representation to reuse."""
@@ -32,19 +34,43 @@ class BaseModel(Base):
         """Return the item as dict."""
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
-class Payment(BaseModel):
-    """Payments database table representation."""
+
+class Order(BaseModel):
+    """Orders database table representation."""
     STATUS_CREATED = "Created"
     STATUS_FINISHED = "Finished"
 
-    __tablename__ = "payment"
-    id_payment = Column(Integer, primary_key=True)
+    __tablename__ = "orders"
+    id_order = Column(Integer, primary_key=True)
+    number_of_pieces = Column(Integer, nullable=False)
+    description = Column(TEXT, nullable=False, default="No description")
+    status_order = Column(String(256), nullable=False, default=STATUS_CREATED)
     id_client = Column(Integer, nullable=False)
-    movement = Column(Float, nullable=False)
-    #date = Column(DateTime(timezone=True), default=datetime.utcnow)
+
+    pieces = relationship("Piece", back_populates="order", lazy="joined")
 
     def as_dict(self):
-        """Return the payment item as dict."""
+        """Return the order item as dict."""
         dictionary = super().as_dict()
-        dictionary['payment'] = [i.as_dict() for i in self.pieces]
+        dictionary['pieces'] = [i.as_dict() for i in self.Pieces]
         return dictionary
+
+
+class Piece(BaseModel):
+    """Piece database table representation."""
+    STATUS_CREATED = "Created"
+    STATUS_CANCELLED = "Cancelled"
+    STATUS_QUEUED = "Queued"
+    STATUS_MANUFACTURING = "Manufacturing"
+    STATUS_MANUFACTURED = "Manufactured"
+
+    __tablename__ = "pieces"
+    id_piece = Column(Integer, primary_key=True)
+    manufacturing_date = Column(DateTime(timezone=True), server_default=None)
+    status_piece = Column(String(256), default=STATUS_QUEUED)
+    id_order = Column(
+        Integer,
+        ForeignKey('orders.id_order', ondelete='cascade'),
+        nullable=True)
+
+    order = relationship('Order', back_populates='pieces', lazy="joined")
