@@ -3,7 +3,6 @@ Acceso a servicios mediante "localhost:service_port" o solo mediante API Gateway
 DESCOMENTAR DATETIME
 
 payment positive desde cliente y negative desde orders para que un cliente no haga negativo y viceversa?
-datetime revisar
 
 subir .db a git?
 
@@ -11,6 +10,4 @@ actualizar client en un futuro?
 
 CREATE DATE en payment list? en clients payment list nos sale
 
-REFORMAT FILES, DOBLE ENTERS
-
----- AL HACER UPDATE, SE ACTUALIZA, PERO CUANDO LE PEDIMOS QUE NOS DEVUELVA LA INFO NO NOS LA MUESTRA ACTUALIZADA
+---- rabbitmq se inicia antes que orders, pero supongo que no le da tiempo a ponerse en marcha y order casca un par de veces antes de que funcione tras varios reinicios

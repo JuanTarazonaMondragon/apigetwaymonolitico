@@ -8,6 +8,7 @@ from . import models
 
 logger = logging.getLogger(__name__)
 
+
 # Generic functions #################################################################################
 # READ
 async def get_list(db: AsyncSession, model):
@@ -16,11 +17,13 @@ async def get_list(db: AsyncSession, model):
     item_list = result.unique().scalars().all()
     return item_list
 
+
 async def get_list_statement_result(db: AsyncSession, stmt):
     """Execute given statement and return list of items."""
     result = await db.execute(stmt)
     item_list = result.unique().scalars().all()
     return item_list
+
 
 async def get_element_statement_result(db: AsyncSession, stmt):
     """Execute statement and return a single items"""
@@ -28,12 +31,14 @@ async def get_element_statement_result(db: AsyncSession, stmt):
     item = result.scalar()
     return item
 
+
 async def get_element_by_id(db: AsyncSession, model, element_id):
     """Retrieve any DB element by id."""
     if element_id is None:
         return None
     element = await db.get(model, element_id)
     return element
+
 
 # DELETE
 async def delete_element_by_id(db: AsyncSession, model, element_id):
@@ -44,6 +49,7 @@ async def delete_element_by_id(db: AsyncSession, model, element_id):
         await db.commit()
     return element
 
+
 # Client functions ##################################################################################
 async def get_client_list(db: AsyncSession):
     """Load all the clients from the database."""
@@ -51,9 +57,11 @@ async def get_client_list(db: AsyncSession):
     clients = await get_list_statement_result(db, stmt)
     return clients
 
+
 async def get_client(db: AsyncSession, client_id):
     """Load a client from the database."""
     return await get_element_by_id(db, models.Client, client_id)
+
 
 async def create_client(db: AsyncSession, client):
     """Persist a new client into the database."""

@@ -6,8 +6,25 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from . import models
 import requests
+import pika
+import json
 
 logger = logging.getLogger(__name__)
+
+
+def callback(ch, method, properties, body):
+    message = body.decode('utf-8')
+    print(f"Mensaje recibido: {message}")
+
+
+credentials = pika.PlainCredentials('user', 'user')
+parameters = pika.ConnectionParameters('macc-microservicios-rabbitmq', 5672, '/', credentials)
+connection = pika.BlockingConnection(parameters)
+channel = connection.channel()
+channel.exchange_declare(exchange='topic_logs', exchange_type='fanout')
+channel.queue_declare(queue='mi_cola')
+channel.queue_bind(exchange='topic_logs', queue='mi_cola')
+channel.basic_consume(queue='mi_cola', on_message_callback=callback, auto_ack=True)
 
 
 # Generic functions #################################################################################
@@ -81,6 +98,7 @@ async def create_order(db: AsyncSession, order):
         "movement": movement
     }
     response = requests.post("http://192.168.18.15:8001/payment", json=data)
+    channel.basic_publish(exchange='topic_logs', body=json.dumps(data).encode('utf-8'), routing_key='')
 
     if response.status_code == 409:
         raise Exception("Insufficient balance.")
@@ -100,7 +118,7 @@ async def change_order_status(db: AsyncSession, order_id):
     """Change order status in the database."""
     db_order = await get_order(db, order_id)
     db_order.status_order = models.Order.STATUS_FINISHED
-    db.add(db_order)
+    #db.add(db_order)
     await db.commit()
     await db.refresh(db_order)
     return db_order

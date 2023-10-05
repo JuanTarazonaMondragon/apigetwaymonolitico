@@ -11,6 +11,7 @@ from routers.router_utils import raise_and_log_error
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+
 @router.get(
     "/",
     summary="Health check endpoint",
@@ -23,6 +24,7 @@ async def health_check():
         "detail": "OK"
     }
 
+
 @router.post(
     "/payment",
     response_model=schemas.Payment,
@@ -31,8 +33,8 @@ async def health_check():
     tags=["Payment"]
 )
 async def create_payment(
-    payment_schema: schemas.PaymentBase,
-    db: AsyncSession = Depends(get_db)
+        payment_schema: schemas.PaymentBase,
+        db: AsyncSession = Depends(get_db)
 ):
     """Create single payment endpoint."""
     logger.debug("POST '/payment' endpoint called.")
@@ -41,6 +43,7 @@ async def create_payment(
         return db_payment
     except Exception as exc:  # @ToDo: To broad exception
         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error creating payment: {exc}")
+
 
 @router.get(
     "/payment",
@@ -55,6 +58,7 @@ async def get_payment_list(
     logger.debug("GET '/payment' endpoint called.")
     payment_list = await crud.get_payments_list(db)
     return payment_list
+
 
 @router.get(
     "/payment/{payment_id}",
@@ -80,6 +84,7 @@ async def get_single_payment(
     if not payment:
         raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Payment {payment_id} not found")
     return payment
+
 
 @router.get(
     "/payment/client/{client_id}",

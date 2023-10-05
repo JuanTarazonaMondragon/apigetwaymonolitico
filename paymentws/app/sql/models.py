@@ -4,7 +4,9 @@ from sqlalchemy import Column, DateTime, Integer, String, TEXT, ForeignKey, Floa
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
-#from datetime import datetime
+
+
+# from datetime import datetime
 
 class BaseModel(Base):
     """Base database table representation to reuse."""
@@ -32,6 +34,7 @@ class BaseModel(Base):
         """Return the item as dict."""
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+
 class Payment(BaseModel):
     """Payments database table representation."""
     STATUS_CREATED = "Created"
@@ -41,7 +44,8 @@ class Payment(BaseModel):
     id_payment = Column(Integer, primary_key=True)
     id_client = Column(Integer, nullable=False)
     movement = Column(Float, nullable=False)
-    #date = Column(DateTime(timezone=True), default=datetime.utcnow)
+
+    # date = Column(DateTime(timezone=True), default=datetime.utcnow)
 
     def as_dict(self):
         """Return the payment item as dict."""

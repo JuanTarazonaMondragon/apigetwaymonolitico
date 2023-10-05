@@ -8,6 +8,7 @@ from . import models
 
 logger = logging.getLogger(__name__)
 
+
 # Generic functions #################################################################################
 # READ
 async def get_list(db: AsyncSession, model):
@@ -16,11 +17,13 @@ async def get_list(db: AsyncSession, model):
     item_list = result.unique().scalars().all()
     return item_list
 
+
 async def get_list_statement_result(db: AsyncSession, stmt):
     """Execute given statement and return list of items."""
     result = await db.execute(stmt)
     item_list = result.unique().scalars().all()
     return item_list
+
 
 async def get_element_statement_result(db: AsyncSession, stmt):
     """Execute statement and return a single items"""
@@ -28,12 +31,14 @@ async def get_element_statement_result(db: AsyncSession, stmt):
     item = result.scalar()
     return item
 
+
 async def get_element_by_id(db: AsyncSession, model, element_id):
     """Retrieve any DB element by id."""
     if element_id is None:
         return None
     element = await db.get(model, element_id)
     return element
+
 
 # DELETE
 async def delete_element_by_id(db: AsyncSession, model, element_id):
@@ -44,6 +49,7 @@ async def delete_element_by_id(db: AsyncSession, model, element_id):
         await db.commit()
     return element
 
+
 # Payment functions ##################################################################################
 async def get_payments_list(db: AsyncSession):
     """Load all the payments from the database."""
@@ -51,15 +57,18 @@ async def get_payments_list(db: AsyncSession):
     payments = await get_list_statement_result(db, stmt)
     return payments
 
+
 async def get_payment(db: AsyncSession, payment_id):
     """Load a payment from the database."""
     return await get_element_by_id(db, models.Payment, payment_id)
+
 
 async def get_clients_payments(db: AsyncSession, client_id):
     """Load all the payments from the database."""
     stmt = select(models.Payment).where(models.Payment.id_client == client_id)
     payments = await get_list_statement_result(db, stmt)
     return payments
+
 
 async def create_payment(db: AsyncSession, payment):
     """Persist a new payment into the database."""

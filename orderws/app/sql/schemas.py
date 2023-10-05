@@ -38,7 +38,7 @@ class Order(OrderBase):
         default=None,
         example=1
     )
-    status: str = Field(
+    status_order: str = Field(
         description="Current status of the order.",
         default="Created",
         example="Finished"

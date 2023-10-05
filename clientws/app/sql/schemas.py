@@ -4,9 +4,11 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
 
+
 class Message(BaseModel):
     """Message schema definition."""
     detail: Optional[str] = Field(example="error or success message.")
+
 
 class ClientBase(BaseModel):
     """Client base schema definition."""
@@ -21,6 +23,7 @@ class ClientBase(BaseModel):
         example="example@gmail.com"
     )
 
+
 class Client(ClientBase):
     """Client schema definition."""
     id_client: int = Field(
@@ -33,6 +36,7 @@ class Client(ClientBase):
         """ORM configuration."""
         orm_mode = True
 
+
 class ClientPost(ClientBase):
     """Schema definition to create a new client."""
     password: str = Field(
@@ -40,5 +44,3 @@ class ClientPost(ClientBase):
         default="asdfasdf3423",
         example="asdfasdf3423"
     )
-
-

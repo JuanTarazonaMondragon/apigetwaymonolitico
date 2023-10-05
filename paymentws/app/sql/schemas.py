@@ -4,11 +4,14 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
 from sqlalchemy import Float
-#from datetime import datetime
+
+
+# from datetime import datetime
 
 class Message(BaseModel):
     """Message schema definition."""
     detail: Optional[str] = Field(example="error or success message")
+
 
 class PaymentBase(BaseModel):
     """Payment base schema definition."""
@@ -19,15 +22,16 @@ class PaymentBase(BaseModel):
         description="The movement of the client."
     )
 
+
 class Payment(PaymentBase):
     """Payment schema definition."""
     id_payment: int = Field(
         description="Primary key/identifier of the payment."
     )
 
-    #date: DateTime = Field(
+    # date: DateTime = Field(
     #    description="Date and time of the payment."
-    #)
+    # )
 
     class Config:
         """ORM configuration."""

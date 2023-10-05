@@ -13,6 +13,8 @@ services:
       - '18011:${UVICORN_PORT}'
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
+    depends_on:
+      - rabbitmq
     networks:
       network:
         ipv4_address: '${SERVICE_CLIENT_R1_IP}'
@@ -28,6 +30,8 @@ services:
   #    - '18021:${UVICORN_PORT}'
   #  environment:
   #    - 'UVICORN_PORT=${UVICORN_PORT}'
+  #  depends_on:
+  #    - rabbitmq
   #  networks:
   #    network:
   #      ipv4_address: '${SERVICE_CLIENT_R2_IP}'
@@ -45,6 +49,8 @@ services:
       - '18012:${UVICORN_PORT}'
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
+    depends_on:
+      - rabbitmq
     networks:
       network:
         ipv4_address: '${SERVICE_DELIVERY_R1_IP}'
@@ -60,6 +66,8 @@ services:
   #    - '18022:${UVICORN_PORT}'
   #  environment:
   #    - 'UVICORN_PORT=${UVICORN_PORT}'
+  #  depends_on:
+  #    - rabbitmq
   #  networks:
   #    network:
   #      ipv4_address: '${SERVICE_DELIVERY_R2_IP}'
@@ -77,6 +85,8 @@ services:
       - '18013:${UVICORN_PORT}'
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
+    depends_on:
+      - rabbitmq
     networks:
       network:
         ipv4_address: '${SERVICE_MACHINE_R1_IP}'
@@ -92,6 +102,8 @@ services:
   #    - '18023:${UVICORN_PORT}'
   #  environment:
   #    - 'UVICORN_PORT=${UVICORN_PORT}'
+  #  depends_on:
+  #    - rabbitmq
   #  networks:
   #    network:
   #      ipv4_address: '${SERVICE_MACHINE_R2_IP}'
@@ -109,6 +121,8 @@ services:
       - '18014:${UVICORN_PORT}'
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
+    depends_on:
+      - rabbitmq
     networks:
       network:
         ipv4_address: '${SERVICE_ORDER_R1_IP}'
@@ -124,6 +138,8 @@ services:
   #    - '18024:${UVICORN_PORT}'
   #  environment:
   #    - 'UVICORN_PORT=${UVICORN_PORT}'
+  #  depends_on:
+  #    - rabbitmq
   #  networks:
   #    network:
   #      ipv4_address: '${SERVICE_ORDER_R2_IP}'
@@ -141,6 +157,8 @@ services:
       - '18015:${UVICORN_PORT}'
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
+    depends_on:
+      - rabbitmq
     networks:
       network:
         ipv4_address: '${SERVICE_PAYMENT_R1_IP}'
@@ -156,6 +174,8 @@ services:
   #    - '18025:${UVICORN_PORT}'
   #  environment:
   #    - 'UVICORN_PORT=${UVICORN_PORT}'
+  #  depends_on:
+  #    - rabbitmq
   #  networks:
   #    network:
   #      ipv4_address: '${SERVICE_PAYMENT_R2_IP}'
@@ -164,6 +184,7 @@ services:
   haproxy:
     hostname: haproxy
     image: haproxy:2.6-alpine
+    container_name: macc-microservicios-haproxy
     ports:
       - '${HAPROXY_PORT}:${HAPROXY_PORT}'
       - '${HAPROXY_STATS_PORT}:${HAPROXY_STATS_PORT}'
@@ -200,14 +221,18 @@ services:
     volumes:
       - './apigateway/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg'
 
-  #rabbitmq:
-  #  image: "rabbitmq:3-management"
-  #  ports:
-  #    - "15672:15672"  # Port for RabbitMQ web UI
-  #    - "5672:5672"    # Port for RabbitMQ service
-  #  environment:
-  #    RABBITMQ_DEFAULT_USER: user
-  #    RABBITMQ_DEFAULT_PASS: user
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    container_name: macc-microservicios-rabbitmq
+    ports:
+      - "15672:15672"  # Port For RabbitMQ Web UI
+      - "5672:5672"    # Port For RabbitMQ Service
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: user
+    networks:
+      network:
+        ipv4_address: '${RABBITMQ_IP}'
 
 networks:
   network:

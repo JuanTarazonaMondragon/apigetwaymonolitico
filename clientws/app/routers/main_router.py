@@ -11,6 +11,7 @@ from routers.router_utils import raise_and_log_error
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+
 @router.get(
     "/",
     summary="Health check endpoint",
@@ -23,6 +24,7 @@ async def health_check():
         "detail": "OK"
     }
 
+
 @router.post(
     "/client",
     response_model=schemas.Client,
@@ -31,8 +33,8 @@ async def health_check():
     tags=["Client"]
 )
 async def create_client(
-    client_schema: schemas.ClientPost,
-    db: AsyncSession = Depends(get_db)
+        client_schema: schemas.ClientPost,
+        db: AsyncSession = Depends(get_db)
 ):
     """Create single client endpoint."""
     logger.debug("POST '/client' endpoint called.")
@@ -41,6 +43,7 @@ async def create_client(
         return db_client
     except Exception as exc:  # @ToDo: To broad exception
         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error creating client: {exc}")
+
 
 @router.get(
     "/client",
@@ -55,6 +58,7 @@ async def get_client_list(
     logger.debug("GET '/client' endpoint called.")
     client_list = await crud.get_client_list(db)
     return client_list
+
 
 @router.get(
     "/client/{client_id}",

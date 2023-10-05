@@ -40,6 +40,7 @@ app = FastAPI(
 
 app.include_router(main_router.router)
 
+
 @app.on_event("startup")
 async def startup_event():
     """Configuration to be executed when FastAPI server starts."""
@@ -47,10 +48,12 @@ async def startup_event():
     async with database.engine.begin() as conn:
         await conn.run_sync(models.Base.metadata.create_all)
 
+
 # Main #############################################################################################
 # If application is run as script, execute uvicorn on port 8000
 if __name__ == "__main__":
     import uvicorn
+
     logger.debug("App run as script")
     uvicorn.run(
         app,

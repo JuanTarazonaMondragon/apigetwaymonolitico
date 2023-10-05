@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
 
+
 class BaseModel(Base):
     """Base database table representation to reuse."""
     __abstract__ = True
@@ -31,6 +32,7 @@ class BaseModel(Base):
     def as_dict(self):
         """Return the item as dict."""
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 class Client(BaseModel):
     """Client database table representation."""

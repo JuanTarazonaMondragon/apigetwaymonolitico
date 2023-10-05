@@ -4,6 +4,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 # Database #########################################################################################
 async def get_db():
     """Generates database sessions and closes them when finished."""
