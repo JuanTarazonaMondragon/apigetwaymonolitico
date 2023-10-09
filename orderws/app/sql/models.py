@@ -38,6 +38,8 @@ class BaseModel(Base):
 class Order(BaseModel):
     """Orders database table representation."""
     STATUS_CREATED = "Created"
+    STATUS_PAYED = "Payed"
+    STATUS_CANCELED = "Canceled"
     STATUS_FINISHED = "Finished"
 
     __tablename__ = "orders"

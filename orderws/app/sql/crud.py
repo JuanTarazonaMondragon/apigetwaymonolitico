@@ -4,27 +4,9 @@ import logging
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from routers.rabbitmq import publish
 from . import models
-import requests
-import pika
 import json
-
-logger = logging.getLogger(__name__)
-
-
-def callback(ch, method, properties, body):
-    message = body.decode('utf-8')
-    print(f"Mensaje recibido: {message}")
-
-
-credentials = pika.PlainCredentials('user', 'user')
-parameters = pika.ConnectionParameters('macc-microservicios-rabbitmq', 5672, '/', credentials)
-connection = pika.BlockingConnection(parameters)
-channel = connection.channel()
-channel.exchange_declare(exchange='topic_logs', exchange_type='fanout')
-channel.queue_declare(queue='mi_cola')
-channel.queue_bind(exchange='topic_logs', queue='mi_cola')
-channel.basic_consume(queue='mi_cola', on_message_callback=callback, auto_ack=True)
 
 
 # Generic functions #################################################################################
@@ -97,16 +79,17 @@ async def create_order(db: AsyncSession, order):
         "id_client": order.id_client,
         "movement": movement
     }
-    response = requests.post("http://192.168.18.15:8001/payment", json=data)
-    channel.basic_publish(exchange='topic_logs', body=json.dumps(data).encode('utf-8'), routing_key='')
 
-    if response.status_code == 409:
-        raise Exception("Insufficient balance.")
+    # Crear evento con nueva order, indicando ID de cliente y cantidad de piezas.
+    message_body = json.dumps(data)
+    routing_key = "order.create"
+    await publish(message_body, routing_key)
 
     db_order = models.Order(
         number_of_pieces=order.number_of_pieces,
         description=order.description,
         id_client=order.id_client,
+        status_order=models.Order.STATUS_CREATED
     )
     db.add(db_order)
     await db.commit()

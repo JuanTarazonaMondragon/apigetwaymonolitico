@@ -158,7 +158,8 @@ services:
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     networks:
       network:
         ipv4_address: '${SERVICE_PAYMENT_R1_IP}'
@@ -222,11 +223,16 @@ services:
       - './apigateway/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg'
 
   rabbitmq:
-    image: "rabbitmq:3-management"
+    image: macc-microservicios-rabbitmq
     container_name: macc-microservicios-rabbitmq
     ports:
       - "15672:15672"  # Port For RabbitMQ Web UI
       - "5672:5672"    # Port For RabbitMQ Service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15672/"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
     environment:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: user

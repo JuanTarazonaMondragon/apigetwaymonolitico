@@ -73,16 +73,16 @@ async def get_clients_payments(db: AsyncSession, client_id):
 async def create_payment(db: AsyncSession, payment):
     """Persist a new payment into the database."""
     """Check if the client has enough balance for the payment, else return False"""
-    payment_movement_float = float(payment.movement)
+    payment_movement_float = float(payment['movement'])
     if payment_movement_float < 0:
-        clients_payments_list = await get_clients_payments(db, payment.id_client)
+        clients_payments_list = await get_clients_payments(db, payment['id_client'])
         client_balance = 0
         for client_payment in clients_payments_list:
             client_balance += client_payment.movement
         if (payment_movement_float + client_balance) < 0:
             raise Exception("Insufficient balance.")
     db_payment = models.Payment(
-        id_client=payment.id_client,
+        id_client=payment['id_client'],
         movement=payment_movement_float
     )
     db.add(db_payment)
