@@ -83,7 +83,24 @@ async def create_payment(db: AsyncSession, payment):
             raise Exception("Insufficient balance.")
     db_payment = models.Payment(
         id_client=payment['id_client'],
+        id_order=payment['id_order'],
         movement=payment_movement_float
+    )
+    db.add(db_payment)
+    await db.commit()
+    await db.refresh(db_payment)
+    return db_payment
+
+
+async def create_deposit(db: AsyncSession, payment):
+    """Persist a new deposit into the database."""
+    payment_movement_float = float(payment.movement)
+    if payment_movement_float <= 0:
+        raise Exception("Can not make negative deposit.")
+    db_payment = models.Payment(
+        id_client=payment.id_client,
+        movement=payment_movement_float,
+        id_order=-1
     )
     db.add(db_payment)
     await db.commit()

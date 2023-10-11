@@ -43,6 +43,7 @@ class Payment(BaseModel):
     __tablename__ = "payment"
     id_payment = Column(Integer, primary_key=True)
     id_client = Column(Integer, nullable=False)
+    id_order = Column(Integer, nullable=True)
     movement = Column(Float, nullable=False)
 
     # date = Column(DateTime(timezone=True), default=datetime.utcnow)

@@ -75,8 +75,21 @@ async def create_order(db: AsyncSession, order):
     movement = - float(order.number_of_pieces)
     if movement >= 0:
         raise Exception("You can't order that amount of pieces.")
+    
+    db_order = models.Order(
+        number_of_pieces=order.number_of_pieces,
+        description=order.description,
+        id_client=order.id_client,
+        status_order=models.Order.STATUS_CREATED
+    )
+
+    db.add(db_order)
+    await db.commit()
+    await db.refresh(db_order)
+
     data = {
-        "id_client": order.id_client,
+        "id_order": db_order.id_order,
+        "id_client": db_order.id_client,
         "movement": movement
     }
 
@@ -85,15 +98,6 @@ async def create_order(db: AsyncSession, order):
     routing_key = "order.create"
     await publish(message_body, routing_key)
 
-    db_order = models.Order(
-        number_of_pieces=order.number_of_pieces,
-        description=order.description,
-        id_client=order.id_client,
-        status_order=models.Order.STATUS_CREATED
-    )
-    db.add(db_order)
-    await db.commit()
-    await db.refresh(db_order)
     return db_order
 
 

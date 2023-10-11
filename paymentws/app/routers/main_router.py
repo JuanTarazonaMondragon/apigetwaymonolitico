@@ -44,6 +44,25 @@ async def create_payment(
     except Exception as exc:  # @ToDo: To broad exception
         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error creating payment: {exc}")
 
+@router.post(
+    "/payment/deposit",
+    response_model=schemas.Payment,
+    summary="Create single deposit",
+    status_code=status.HTTP_201_CREATED,
+    tags=["Payment"]
+)
+async def create_payment(
+        payment_schema: schemas.PaymentBase,
+        db: AsyncSession = Depends(get_db)
+):
+    """Create single deposit endpoint."""
+    logger.debug("POST '/payment/deposit' endpoint called.")
+    try:
+        db_payment = await crud.create_deposit(db, payment_schema)
+        return db_payment
+    except Exception as exc:  # @ToDo: To broad exception
+        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error creating deposit: {exc}")
+
 
 @router.get(
     "/payment",

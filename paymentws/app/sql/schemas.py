@@ -28,6 +28,10 @@ class Payment(PaymentBase):
     id_payment: int = Field(
         description="Primary key/identifier of the payment."
     )
+    id_order: int = Field(
+        description="The ID of the order.",
+        example="-1"
+    )
 
     # date: DateTime = Field(
     #    description="Date and time of the payment."
