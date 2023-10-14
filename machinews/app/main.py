@@ -3,10 +3,10 @@
 import logging
 import os
 from fastapi import FastAPI
-
-from routers import main_router, rabbitmq
+from routers import main_router
 from sql import models, database
 import asyncio
+from routers.rabbitmq import subscribe
 
 # Configure logging ################################################################################
 logger = logging.getLogger(__name__)
@@ -15,19 +15,19 @@ logger = logging.getLogger(__name__)
 APP_VERSION = os.getenv("APP_VERSION", "2.0.0")
 logger.info("Running app version %s", APP_VERSION)
 DESCRIPTION = """
-Order microservice application.
+Machine microservice application.
 """
 
 tag_metadata = [
     {
-        "name": "Order",
-        "description": "Endpoints to **CREATE** and **READ** orders.",
+        "name": "Machine",
+        "description": "Endpoints to **CREATE** and **READ** machine.",
     },
 ]
 
 app = FastAPI(
     redoc_url=None,  # disable redoc documentation.
-    title="FastAPI - Order microservice app",
+    title="FastAPI - Machine microservice app",
     description=DESCRIPTION,
     version=APP_VERSION,
     servers=[
@@ -49,9 +49,7 @@ async def startup_event():
     logger.info("Creating database tables")
     async with database.engine.begin() as conn:
         await conn.run_sync(models.Base.metadata.create_all)
-    asyncio.create_task(rabbitmq.subscribe_payments())
-    asyncio.create_task(rabbitmq.subscribe_pieces())
-    asyncio.create_task(rabbitmq.subscribe_delivery())
+    asyncio.create_task(subscribe())
 
 
 # Main #############################################################################################

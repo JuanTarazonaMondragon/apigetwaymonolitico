@@ -1,0 +1,50 @@
+# -*- coding: utf-8 -*-
+"""Classes for Request/Response schema definitions."""
+# pylint: disable=too-few-public-methods
+from typing import List, Optional
+from pydantic import BaseModel, Field  # pylint: disable=no-name-in-module
+from datetime import datetime
+
+
+class Message(BaseModel):
+    """Message schema definition."""
+    detail: Optional[str] = Field(example="error or success message")
+
+
+class DeliveryBase(BaseModel):
+    """Order base schema definition."""
+    name: int = Field(
+        description="The name of the person that will recieve the package.",
+        default="No name",
+        example="Luis"
+    )
+    address: str = Field(
+        description="The address where the packege will be recieved.",
+        default="No address",
+        example="Calle x, 1B"
+    )
+    id_order: int = Field(
+        description="Primary key/identifier of the order.",
+        default=None,
+        example=1
+    )
+    #  pieces = relationship("Piece", lazy="joined")
+
+
+class Delivery(DeliveryBase):
+    """Delivery schema definition."""
+    id_delivery: int = Field(
+        description="Primary key/identifier of the order.",
+        default=None,
+        example=1
+    )
+    status_delivery: str = Field(
+        description="Current status of the order.",
+        default="Created",
+        example="Finished"
+    )
+
+    class Config:
+        """ORM configuration."""
+        orm_mode = True
+

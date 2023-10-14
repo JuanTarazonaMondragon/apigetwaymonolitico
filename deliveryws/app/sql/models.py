@@ -35,44 +35,25 @@ class BaseModel(Base):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
-class Order(BaseModel):
-    """Orders database table representation."""
+class Delivery(BaseModel):
+    """Payments database table representation."""
     STATUS_CREATED = "Created"
-    STATUS_PAYED = "Payed"
-    STATUS_CANCELED = "Canceled"
-    STATUS_QUEUED = "Queued"
-    STATUS_PRODUCED = "Produced"
+    STATUS_INFORMED = "Informed"
+    STATUS_PREPARED = "Prepared"
     STATUS_DELIVERING = "Delivering"
-    STATUS_DELIVERING = "Delivered"
+    STATUS_DELIVERED = "Delivered"
 
-    __tablename__ = "orders"
-    id_order = Column(Integer, primary_key=True)
-    number_of_pieces = Column(Integer, nullable=False)
-    description = Column(TEXT, nullable=False, default="No description")
-    status_order = Column(String(256), nullable=False, default=STATUS_CREATED)
-    id_client = Column(Integer, nullable=False)
+    __tablename__ = "payment"
+    id_delivery = Column(Integer, primary_key=True)
+    id_order = Column(Integer, nullable=False)
+    name = Column(String(256), nullable=True)
+    address = Column(String(256), nullable=True)
+    status_delivery = Column(String(256), nullable=False, default=STATUS_CREATED)
 
-    pieces = relationship("Piece", back_populates="order", lazy="joined")
+    # date = Column(DateTime(timezone=True), default=datetime.utcnow)
 
     def as_dict(self):
-        """Return the order item as dict."""
+        """Return the payment item as dict."""
         dictionary = super().as_dict()
-        dictionary['pieces'] = [i.as_dict() for i in self.Pieces]
+        dictionary['payment'] = [i.as_dict() for i in self.pieces]
         return dictionary
-
-
-class Piece(BaseModel):
-    """Piece database table representation."""
-    STATUS_QUEUED = "Queued"
-    STATUS_PRODUCED = "Produced"
-
-    __tablename__ = "pieces"
-    id_piece = Column(Integer, primary_key=True)
-    manufacturing_date = Column(DateTime(timezone=True), server_default=None)
-    status_piece = Column(String(256), default=STATUS_QUEUED)
-    id_order = Column(
-        Integer,
-        ForeignKey('orders.id_order', ondelete='cascade'),
-        nullable=True)
-
-    order = relationship('Order', back_populates='pieces', lazy="joined")

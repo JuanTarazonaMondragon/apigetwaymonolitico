@@ -14,7 +14,8 @@ services:
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     networks:
       network:
         ipv4_address: '${SERVICE_CLIENT_R1_IP}'
@@ -50,7 +51,8 @@ services:
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     networks:
       network:
         ipv4_address: '${SERVICE_DELIVERY_R1_IP}'
@@ -86,7 +88,8 @@ services:
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     networks:
       network:
         ipv4_address: '${SERVICE_MACHINE_R1_IP}'
@@ -122,7 +125,8 @@ services:
     environment:
       - 'UVICORN_PORT=${UVICORN_PORT}'
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     networks:
       network:
         ipv4_address: '${SERVICE_ORDER_R1_IP}'
@@ -230,7 +234,7 @@ services:
       - "5672:5672"    # Port For RabbitMQ Service
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:15672/"]
-      interval: 3s
+      interval: 2s
       timeout: 2s
       retries: 10
     environment:

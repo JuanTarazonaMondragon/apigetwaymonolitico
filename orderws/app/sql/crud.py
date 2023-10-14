@@ -63,6 +63,11 @@ async def get_order(db: AsyncSession, order_id):
     return await get_element_by_id(db, models.Order, order_id)
 
 
+async def get_piece(db: AsyncSession, piece_id):
+    """Load an piece from the database."""
+    return await get_element_by_id(db, models.Piece, piece_id)
+
+
 async def get_clients_orders(db: AsyncSession, client_id):
     """Load all the orders from the database."""
     stmt = select(models.Order).where(models.Order.id_client == client_id)
@@ -75,7 +80,7 @@ async def create_order(db: AsyncSession, order):
     movement = - float(order.number_of_pieces)
     if movement >= 0:
         raise Exception("You can't order that amount of pieces.")
-    
+
     db_order = models.Order(
         number_of_pieces=order.number_of_pieces,
         description=order.description,
@@ -101,11 +106,49 @@ async def create_order(db: AsyncSession, order):
     return db_order
 
 
-async def change_order_status(db: AsyncSession, order_id):
+async def change_order_status(db: AsyncSession, order_id, status):
     """Change order status in the database."""
     db_order = await get_order(db, order_id)
-    db_order.status_order = models.Order.STATUS_FINISHED
-    #db.add(db_order)
+    db_order.status_order = status
     await db.commit()
     await db.refresh(db_order)
     return db_order
+
+
+async def create_piece(db: AsyncSession, piece):
+    """Persist a new piece into the database."""
+
+    db_piece = models.Piece(
+        status_piece=piece.status_piece,
+        id_order=piece.id_order
+    )
+
+    db.add(db_piece)
+    await db.commit()
+    await db.refresh(db_piece)
+    data = {
+        "id_order": db_piece.id_order,
+        "id_client": db_piece.id_piece
+    }
+
+    # Crear evento con nueva order, indicando ID de cliente y cantidad de piezas.
+    message_body = json.dumps(data)
+    routing_key = "piece.created"
+    await publish(message_body, routing_key)
+    return db_piece
+
+
+async def change_piece_status(db: AsyncSession, piece_id, status):
+    """Change order status in the database."""
+    db_piece = await get_piece(db, piece_id)
+    db_piece.status_order = status
+    await db.commit()
+    await db.refresh(db_piece)
+    return db_piece
+
+
+async def get_order_pieces(db: AsyncSession, order_id):
+    """Load all the payments from the database."""
+    stmt = select(models.Piece).where(models.Piece.id_order == order_id)
+    pieces = await get_list_statement_result(db, stmt)
+    return pieces
