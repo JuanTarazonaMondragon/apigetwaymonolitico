@@ -1,11 +1,11 @@
 docker-compose kill
 
-docker rmi macc-microservicios-client
-docker rmi macc-microservicios-delivery
-docker rmi macc-microservicios-machine
-docker rmi macc-microservicios-order
-docker rmi macc-microservicios-payment
-docker rmi macc-microservicios-rabbitmq
+docker rmi -f macc-microservicios-client
+docker rmi -f macc-microservicios-delivery
+docker rmi -f macc-microservicios-machine
+docker rmi -f macc-microservicios-order
+docker rmi -f macc-microservicios-payment
+docker rmi -f macc-microservicios-rabbitmq
 
 docker build -t macc-microservicios-client ./clientws
 docker build -t macc-microservicios-delivery ./deliveryws

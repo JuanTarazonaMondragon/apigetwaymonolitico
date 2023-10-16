@@ -74,7 +74,7 @@ async def create_delivery(db: AsyncSession, delivery):
     """Persist a new order into the database."""
 
     db_delivery = models.Delivery(
-        id_order=delivery.id_order,
+        id_order=delivery['id_order'],
         status_delivery=models.Delivery.STATUS_CREATED
     )
 

@@ -7,30 +7,29 @@ from sql import models, schemas
 async def on_pay_message(message):
     async with message.process():
         payment = json.loads(message.body)
-        db = SessionLocal() # Esto es una puta guarrada, idea de Andoni, hay que preguntar si es legal o no. Ojo, pero al menos funciona, GRANDE ANDONI!
+        db = SessionLocal()
 
         if(payment['payment_status']):
             status= models.Order.STATUS_PAYED
+            db_order = await crud.change_order_status(db, payment['id_order'], status)
+
+            for i in range (0,db_order.number_of_pieces):
+                piece = schemas.PieceBase(
+                    status_piece=models.Piece.STATUS_QUEUED,
+                    id_order=db_order.id_order
+                    # no se si hay que meter manufacturing date
+                )
+                await crud.create_piece(db, piece)
+            await db.close()
+            data = {
+                "id_order": db_order.id_order
+            }
+            message_body = json.dumps(data)
+            routing_key = "order.producing"
+            await publish(message_body, routing_key)
         else:
             status = models.Order.STATUS_CANCELED
-        db_order = await crud.change_order_status(db, payment['id_order'], status)
-
-
-        for i in range (0,db_order.number_of_pieces):
-            piece = schemas.PieceBase(
-                status_piece=models.Piece.STATUS_QUEUED,
-                id_order=piece.id_order
-                # no se si hay que meter manufacturing date
-            )
-            await crud.create_piece(db, piece)
-        await db.close()
-        data = {
-            "id_order": db_order.id_order
-        }
-        message_body = json.dumps(data)
-        routing_key = "order.producing"
-        await publish(message_body, routing_key)
-
+            db_order = await crud.change_order_status(db, payment['id_order'], status)
 
 async def subscribe_payments():
     # Define your RabbitMQ server connection parameters directly as keyword arguments
@@ -72,9 +71,12 @@ async def on_piece_message(message):
         db_pieces = await crud.get_order_pieces(db,piece['id_order'])
         order_finished = True
         for piece in db_pieces:
-            if piece.status_piece == models.Piece.STATUS_CREATED:
+            print("en rabbitmq")
+            print(piece.status_piece)
+            if piece.status_piece == models.Piece.STATUS_QUEUED:
                 order_finished = False
                 break
+        print(order_finished)
         if order_finished:
             db_order = await crud.change_order_status(db, piece['id_order'], models.Order.STATUS_PRODUCED)
             data = {

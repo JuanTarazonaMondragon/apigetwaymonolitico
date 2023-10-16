@@ -12,7 +12,7 @@ async def on_producing_message(message):
         db = SessionLocal() # Esto es una puta guarrada, idea de Andoni, hay que preguntar si es legal o no. Ojo, pero al menos funciona, GRANDE ANDONI!
 
         await crud.create_delivery(db, delivery)
-        db.close()
+        await db.close()
 
 async def subscribe_producing():
     # Define your RabbitMQ server connection parameters directly as keyword arguments
@@ -123,9 +123,9 @@ async def send_product(delivery):
     message_body = json.dumps(data)
     routing_key = "order.delivery"
     await publish(message_body, routing_key)
-    print(f"Delivering order: {delivery['id_order']}")
+    print(f"Delivering order: " + delivery['id_order'])
     await asyncio.sleep(10)
-    print(f"Delivered order: {delivery['id_order']}")
+    print(f"Delivered order: " + delivery['id_order'])
     data = {
         "id_order": delivery['id_order'],
         "status_delivery": models.Delivery.STATUS_DELIVERED

@@ -4,13 +4,15 @@ import json
 from sql.database import SessionLocal # pylint: disable=import-outside-toplevel
 from sql import crud
 
+import logging
+logger = logging.getLogger("rabbit")
+
 async def on_message(message):
     async with message.process():
         piece = json.loads(message.body)
 
-        print(f"Producing: {piece['id_piece']}")
         await asyncio.sleep(2)
-        print(f"Produced: {piece['id_piece']}")
+
         data = {
             "id_piece": piece['id_piece'],
             "id_order": piece['id_order']

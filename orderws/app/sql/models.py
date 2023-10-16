@@ -69,7 +69,7 @@ class Piece(BaseModel):
     __tablename__ = "pieces"
     id_piece = Column(Integer, primary_key=True)
     manufacturing_date = Column(DateTime(timezone=True), server_default=None)
-    status_piece = Column(String(256), default=STATUS_QUEUED)
+    status_piece = Column(String(256))
     id_order = Column(
         Integer,
         ForeignKey('orders.id_order', ondelete='cascade'),

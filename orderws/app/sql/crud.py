@@ -113,7 +113,7 @@ async def change_order_status(db: AsyncSession, order_id, status):
     await db.commit()
     await db.refresh(db_order)
     return db_order
-
+    
 
 async def create_piece(db: AsyncSession, piece):
     """Persist a new piece into the database."""
@@ -126,9 +126,10 @@ async def create_piece(db: AsyncSession, piece):
     db.add(db_piece)
     await db.commit()
     await db.refresh(db_piece)
+    
     data = {
         "id_order": db_piece.id_order,
-        "id_client": db_piece.id_piece
+        "id_piece": db_piece.id_piece
     }
 
     # Crear evento con nueva order, indicando ID de cliente y cantidad de piezas.
@@ -140,10 +141,20 @@ async def create_piece(db: AsyncSession, piece):
 
 async def change_piece_status(db: AsyncSession, piece_id, status):
     """Change order status in the database."""
+
+    # quitar este print
+    print(piece_id)
+    
     db_piece = await get_piece(db, piece_id)
     db_piece.status_order = status
+    
+    
+
     await db.commit()
     await db.refresh(db_piece)
+    
+    print("en crud, status order")
+    print(db_piece.status_order)
     return db_piece
 
 

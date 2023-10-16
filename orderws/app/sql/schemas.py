@@ -55,10 +55,9 @@ class OrderPost(OrderBase):
 
 class PieceBase(BaseModel):
     """Piece base schema definition."""
-    id_piece: int = Field(
-        description="Piece identifier (Primary key).",
-        example="1"
-    )
+    
+    id_order: int = Field(description="Order where the piece belongs to.")
+    
     manufacturing_date: Optional[datetime] = Field(
         description="Date when piece has been manufactured.",
         example="2022-07-22T17:32:32.193211"
@@ -72,7 +71,10 @@ class PieceBase(BaseModel):
 
 class Piece(PieceBase):
     """Piece schema definition."""
-    id_order: Optional[Order] = Field(description="Order where the piece belongs to.")
+    id_piece: int = Field(
+        description="Piece identifier (Primary key).",
+        example="1"
+    )
 
     class Config:
         """ORM configuration."""
