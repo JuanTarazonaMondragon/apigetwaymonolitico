@@ -67,7 +67,7 @@ async def get_delivery_by_order(db: AsyncSession, order_id):
     """Load an order from the database."""
     stmt = select(models.Delivery).where(models.Delivery.id_order == order_id)
     delivery = await get_list_statement_result(db, stmt)
-    return delivery
+    return delivery[0]
 
 
 async def create_delivery(db: AsyncSession, delivery):
@@ -75,7 +75,9 @@ async def create_delivery(db: AsyncSession, delivery):
 
     db_delivery = models.Delivery(
         id_order=delivery['id_order'],
-        status_delivery=models.Delivery.STATUS_CREATED
+        status_delivery=models.Delivery.STATUS_CREATED,
+        name="",
+        address=""
     )
 
     db.add(db_delivery)
@@ -88,7 +90,7 @@ async def create_delivery(db: AsyncSession, delivery):
 async def change_delivery_status(db: AsyncSession, delivery_id, status):
     """Change order status in the database."""
     db_delivery = await get_delivery(db, delivery_id)
-    db_delivery.status_order = status
+    db_delivery.status_delivery = status
     await db.commit()
     await db.refresh(db_delivery)
     return db_delivery

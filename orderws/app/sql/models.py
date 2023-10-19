@@ -43,7 +43,7 @@ class Order(BaseModel):
     STATUS_QUEUED = "Queued"
     STATUS_PRODUCED = "Produced"
     STATUS_DELIVERING = "Delivering"
-    STATUS_DELIVERING = "Delivered"
+    STATUS_DELIVERED = "Delivered"
 
     __tablename__ = "orders"
     id_order = Column(Integer, primary_key=True)

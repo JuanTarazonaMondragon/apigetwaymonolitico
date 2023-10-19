@@ -25,7 +25,7 @@ async def health_check():
     }
 
 
-@router.post(
+"""@router.post(
     "/payment",
     response_model=schemas.Payment,
     summary="Create single payment",
@@ -36,13 +36,12 @@ async def create_payment(
         payment_schema: schemas.PaymentBase,
         db: AsyncSession = Depends(get_db)
 ):
-    """Create single payment endpoint."""
     logger.debug("POST '/payment' endpoint called.")
     try:
         db_payment = await crud.create_payment(db, payment_schema)
         return db_payment
     except Exception as exc:  # @ToDo: To broad exception
-        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error creating payment: {exc}")
+        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error creating payment: {exc}")"""
 
 @router.post(
     "/payment/deposit",

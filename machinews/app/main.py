@@ -4,7 +4,6 @@ import logging
 import os
 from fastapi import FastAPI
 from routers import main_router
-from sql import models, database
 import asyncio
 from routers.rabbitmq import subscribe
 
@@ -47,8 +46,6 @@ app.include_router(main_router.router)
 async def startup_event():
     """Configuration to be executed when FastAPI server starts."""
     logger.info("Creating database tables")
-    async with database.engine.begin() as conn:
-        await conn.run_sync(models.Base.metadata.create_all)
     asyncio.create_task(subscribe())
 
 

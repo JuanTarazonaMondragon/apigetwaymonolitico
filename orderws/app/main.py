@@ -51,7 +51,8 @@ async def startup_event():
         await conn.run_sync(models.Base.metadata.create_all)
     asyncio.create_task(rabbitmq.subscribe_payments())
     asyncio.create_task(rabbitmq.subscribe_pieces())
-    asyncio.create_task(rabbitmq.subscribe_delivery())
+    asyncio.create_task(rabbitmq.subscribe_delivering())
+    asyncio.create_task(rabbitmq.subscribe_delivered())
 
 
 # Main #############################################################################################

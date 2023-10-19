@@ -80,29 +80,24 @@ async def create_order(db: AsyncSession, order):
     movement = - float(order.number_of_pieces)
     if movement >= 0:
         raise Exception("You can't order that amount of pieces.")
-
     db_order = models.Order(
         number_of_pieces=order.number_of_pieces,
         description=order.description,
         id_client=order.id_client,
         status_order=models.Order.STATUS_CREATED
     )
-
     db.add(db_order)
     await db.commit()
     await db.refresh(db_order)
-
     data = {
         "id_order": db_order.id_order,
         "id_client": db_order.id_client,
         "movement": movement
     }
-
     # Crear evento con nueva order, indicando ID de cliente y cantidad de piezas.
     message_body = json.dumps(data)
     routing_key = "order.create"
     await publish(message_body, routing_key)
-
     return db_order
 
 
@@ -117,21 +112,17 @@ async def change_order_status(db: AsyncSession, order_id, status):
 
 async def create_piece(db: AsyncSession, piece):
     """Persist a new piece into the database."""
-
     db_piece = models.Piece(
         status_piece=piece.status_piece,
         id_order=piece.id_order
     )
-
     db.add(db_piece)
     await db.commit()
     await db.refresh(db_piece)
-    
     data = {
         "id_order": db_piece.id_order,
         "id_piece": db_piece.id_piece
     }
-
     # Crear evento con nueva order, indicando ID de cliente y cantidad de piezas.
     message_body = json.dumps(data)
     routing_key = "piece.created"
@@ -140,21 +131,11 @@ async def create_piece(db: AsyncSession, piece):
 
 
 async def change_piece_status(db: AsyncSession, piece_id, status):
-    """Change order status in the database."""
-
-    # quitar este print
-    print(piece_id)
-    
+    """Change piece status in the database."""
     db_piece = await get_piece(db, piece_id)
-    db_piece.status_order = status
-    
-    
-
+    db_piece.status_piece = status
     await db.commit()
     await db.refresh(db_piece)
-    
-    print("en crud, status order")
-    print(db_piece.status_order)
     return db_piece
 
 

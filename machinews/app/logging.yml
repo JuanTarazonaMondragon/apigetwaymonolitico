@@ -34,3 +34,8 @@ loggers:
     level: DEBUG
     handlers: [console]
     propagate: no
+
+  rabbit:
+    level: DEBUG
+    handlers: [console]
+    propagate: no

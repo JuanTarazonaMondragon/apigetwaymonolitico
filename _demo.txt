@@ -1,0 +1,13 @@
+crear cliente
+intentar hacer pedido sin tener saldo
+hacer get de orders para mostrar Canceled
+hacer ingreso
+hacer pedido y mostrar payed mientras que se producen
+para el doc: hacer get de las piezas (meter main router que use el crud get_order_pieces dentro de order)
+- mientras se hacen las piezas mando info: informed y cuando se produzcan pasa a delivering
+- despues de que se hagan las piezas mando info: produced y cuando mande info pasa a delivering
+cambia de delivering a delivered (mirar tanto en order como en delivery metiendo id)
+mostrar como en order se pueden mirar todos los orders, uno en concreto o todos los de un cliente
+mostrar como en payment se pueden mirar todos los payments, uno en concreto o todos los de un cliente
+
+NOTA MENTAL, AL CREAR ORDER PARA QUE SE RECHAZA NUUUUNCA PEDIR ESTADO DE DELIVERY A ESE ID ORDER, PETA

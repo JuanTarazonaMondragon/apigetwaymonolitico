@@ -31,16 +31,16 @@ async def health_check():
 @router.post(
     "/delivery",
     response_model=schemas.Delivery,
-    summary="Create single payment",
+    summary="Create single delivery",
     status_code=status.HTTP_201_CREATED,
-    tags=["Payment"]
+    tags=["Delivery"]
 )
 async def create_delivery_info(
         delivery_info: schemas.DeliveryBase,
         db: AsyncSession = Depends(get_db)
 ):
-    """Create single payment endpoint."""
-    logger.debug("POST '/payment' endpoint called.")
+    """Create single delivery endpoint."""
+    logger.debug("POST '/delivery' endpoint called.")
     try:
         db_delivery = await crud.add_delivery_info(db, delivery_info)
         if db_delivery.status_delivery == models.Delivery.STATUS_CREATED:
@@ -51,7 +51,7 @@ async def create_delivery_info(
             asyncio.create_task(send_product(db_delivery))
             return db_delivery
     except Exception as exc:  # @ToDo: To broad exception
-        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error creating payment: {exc}")
+        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error creating delivery: {exc}")
 
 
 @router.get(
@@ -63,21 +63,18 @@ async def create_delivery_info(
             "description": "Requested delivery."
         },
         status.HTTP_404_NOT_FOUND: {
-            "model": schemas.Message, "description": "Payment not found"
+            "model": schemas.Message, "description": "Delivery not found"
         }
     },
     tags=['Delivery']
 )
-async def get_single_payment(
+async def get_single_delivery(
         order_id: int,
         db: AsyncSession = Depends(get_db)
 ):
-    """Retrieve single payment by id"""
-    logger.debug("GET '/payment/%i' endpoint called.", order_id)
-    payment = await crud.get_delivery_by_order(db, order_id)
-    if not payment:
-        raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Payment {order_id} not found")
-    return payment
-
-
-
+    """Retrieve single delivery by id"""
+    logger.debug("GET '/delivery/%i' endpoint called.", order_id)
+    delivery = await crud.get_delivery_by_order(db, order_id)
+    if not delivery:
+        raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Delivery {order_id} not found")
+    return delivery

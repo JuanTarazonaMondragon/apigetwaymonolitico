@@ -1,13 +1,5 @@
 Acceso a servicios mediante "localhost:service_port" o solo mediante API Gateway?
 
-DESCOMENTAR DATETIME
+subir .db a gitignore
 
-payment positive desde cliente y negative desde orders para que un cliente no haga negativo y viceversa?
-
-subir .db a git?
-
-actualizar client en un futuro?
-
-CREATE DATE en payment list? en clients payment list nos sale
-
----- rabbitmq se inicia antes que orders, pero supongo que no le da tiempo a ponerse en marcha y order casca un par de veces antes de que funcione tras varios reinicios
+__pycache__ a gitignore

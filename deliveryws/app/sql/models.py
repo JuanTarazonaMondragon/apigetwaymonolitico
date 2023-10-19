@@ -36,14 +36,14 @@ class BaseModel(Base):
 
 
 class Delivery(BaseModel):
-    """Payments database table representation."""
+    """Deliveries database table representation."""
     STATUS_CREATED = "Created"
     STATUS_INFORMED = "Informed"
     STATUS_PREPARED = "Prepared"
     STATUS_DELIVERING = "Delivering"
     STATUS_DELIVERED = "Delivered"
 
-    __tablename__ = "payment"
+    __tablename__ = "delivery"
     id_delivery = Column(Integer, primary_key=True)
     id_order = Column(Integer, nullable=False)
     name = Column(String(256), nullable=True)

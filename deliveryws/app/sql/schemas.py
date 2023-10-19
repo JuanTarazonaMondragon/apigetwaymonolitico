@@ -12,8 +12,8 @@ class Message(BaseModel):
 
 
 class DeliveryBase(BaseModel):
-    """Order base schema definition."""
-    name: int = Field(
+    """Delivery base schema definition."""
+    name: str = Field(
         description="The name of the person that will recieve the package.",
         default="No name",
         example="Luis"
@@ -34,12 +34,12 @@ class DeliveryBase(BaseModel):
 class Delivery(DeliveryBase):
     """Delivery schema definition."""
     id_delivery: int = Field(
-        description="Primary key/identifier of the order.",
+        description="Primary key/identifier of the delivery.",
         default=None,
         example=1
     )
     status_delivery: str = Field(
-        description="Current status of the order.",
+        description="Current status of the delivery.",
         default="Created",
         example="Finished"
     )
