@@ -51,56 +51,36 @@ async def delete_element_by_id(db: AsyncSession, model, element_id):
 
 
 # Logs functions ##################################################################################
-async def get_delivery_list(db: AsyncSession):
-    """Load all the orders from the database."""
-    stmt = select(models.Delivery)
+async def get_all_logs(db: AsyncSession):
+    """Load all the logs from the database."""
+    stmt = select(models.Log)
     deliveries = await get_list_statement_result(db, stmt)
     return deliveries
 
 
-async def get_delivery(db: AsyncSession, delivery_id):
-    """Load an order from the database."""
-    return await get_element_by_id(db, models.Delivery, delivery_id)
+async def get_log(db: AsyncSession, log_id):
+    """Load a log from the database."""
+    return await get_element_by_id(db, models.Delivery, log_id)
 
 
-async def get_delivery_by_order(db: AsyncSession, order_id):
-    """Load an order from the database."""
-    stmt = select(models.Delivery).where(models.Delivery.id_order == order_id)
-    delivery = await get_list_statement_result(db, stmt)
-    return delivery[0]
+async def get_logs(db: AsyncSession, number_of_logs):
+    """Load a log from the database."""
+    stmt = select(models.Log).order_by(models.Log.id_log.desc()).limit(number_of_logs)
+    return await get_list_statement_result(db, stmt)
 
 
-async def create_delivery(db: AsyncSession, delivery):
+async def create_log(db: AsyncSession, log):
     """Persist a new order into the database."""
 
-    db_delivery = models.Delivery(
-        id_order=delivery['id_order'],
-        status_delivery=models.Delivery.STATUS_CREATED,
-        name="",
-        address=""
+    db_log = models.Log(
+        routing_key=log['routing_key'],
+        data=log['data'],
     )
 
-    db.add(db_delivery)
+    db.add(db_log)
     await db.commit()
-    await db.refresh(db_delivery)
+    await db.refresh(db_log)
 
-    return db_delivery
-
-
-async def change_delivery_status(db: AsyncSession, delivery_id, status):
-    """Change order status in the database."""
-    db_delivery = await get_delivery(db, delivery_id)
-    db_delivery.status_delivery = status
-    await db.commit()
-    await db.refresh(db_delivery)
-    return db_delivery
+    return db_log
 
 
-async def add_delivery_info(db: AsyncSession, delivery):
-    """Change order status in the database."""
-    db_delivery = await get_delivery_by_order(db, delivery.id_order)
-    db_delivery.name = delivery.name
-    db_delivery.address = delivery.address
-    await db.commit()
-    await db.refresh(db_delivery)
-    return db_delivery

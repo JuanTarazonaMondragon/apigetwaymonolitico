@@ -35,20 +35,13 @@ class BaseModel(Base):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
-class Delivery(BaseModel):
-    """Deliveries database table representation."""
-    STATUS_CREATED = "Created"
-    STATUS_INFORMED = "Informed"
-    STATUS_PREPARED = "Prepared"
-    STATUS_DELIVERING = "Delivering"
-    STATUS_DELIVERED = "Delivered"
+class Log(BaseModel):
+    """Logs database table representation."""
 
-    __tablename__ = "delivery"
-    id_delivery = Column(Integer, primary_key=True)
-    id_order = Column(Integer, nullable=False)
-    name = Column(String(256), nullable=True)
-    address = Column(String(256), nullable=True)
-    status_delivery = Column(String(256), nullable=False, default=STATUS_CREATED)
+    __tablename__ = "log"
+    id_log = Column(Integer, primary_key=True)
+    routing_key = Column(String(256), nullable=False)
+    data = Column(String(256), nullable=False)
 
     # date = Column(DateTime(timezone=True), default=datetime.utcnow)
 

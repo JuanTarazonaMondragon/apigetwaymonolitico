@@ -11,40 +11,20 @@ class Message(BaseModel):
     detail: Optional[str] = Field(example="error or success message")
 
 
-class DeliveryBase(BaseModel):
-    """Delivery base schema definition."""
-    name: str = Field(
-        description="The name of the person that will recieve the package.",
-        default="No name",
-        example="Luis"
+class LogBase(BaseModel):
+    """Log base schema definition."""
+    data: str = Field(
+        description="The data of the message.",
+        default=""
     )
-    address: str = Field(
-        description="The address where the packege will be recieved.",
-        default="No address",
-        example="Calle x, 1B"
+    routing_key: str = Field(
+        description="The routing key of the message.",
+        default="",
+        example="Order.crate"
     )
-    id_order: int = Field(
-        description="Primary key/identifier of the order.",
+    id_log: int = Field(
+        description="Primary key/identifier of the log.",
         default=None,
         example=1
     )
-    #  pieces = relationship("Piece", lazy="joined")
-
-
-class Delivery(DeliveryBase):
-    """Delivery schema definition."""
-    id_delivery: int = Field(
-        description="Primary key/identifier of the delivery.",
-        default=None,
-        example=1
-    )
-    status_delivery: str = Field(
-        description="Current status of the delivery.",
-        default="Created",
-        example="Finished"
-    )
-
-    class Config:
-        """ORM configuration."""
-        orm_mode = True
 

@@ -8,7 +8,7 @@ docker rmi -f macc-microservicios-payment
 docker rmi -f macc-microservicios-rabbitmq
 docker rmi -f macc-microservicios-logs
 
-docker build -t macc-microservicios-logs ./logs
+docker build -t macc-microservicios-logs ./logsws
 docker build -t macc-microservicios-client ./clientws
 docker build -t macc-microservicios-delivery ./deliveryws
 docker build -t macc-microservicios-machine ./machinews

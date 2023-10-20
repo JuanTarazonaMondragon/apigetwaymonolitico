@@ -29,7 +29,7 @@ async def health_check():
     summary="Retrieve certain number of logs",
     responses={
         status.HTTP_200_OK: {
-            "model": schemas.Logs,
+            "model": schemas.LogBase,
             "description": "Requested logs."
         },
         status.HTTP_404_NOT_FOUND: {
