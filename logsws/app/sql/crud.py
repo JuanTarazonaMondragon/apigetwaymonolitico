@@ -73,8 +73,8 @@ async def create_log(db: AsyncSession, log):
     """Persist a new order into the database."""
 
     db_log = models.Log(
-        routing_key=log['routing_key'],
-        data=log['data'],
+        routing_key=log.routing_key,
+        data=log.data,
     )
 
     db.add(db_log)

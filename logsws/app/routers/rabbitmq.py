@@ -8,7 +8,7 @@ from sql import crud, models
 async def on_log_message(message):
     async with message.process():
         routing_key = message.routing_key
-        data = json.loads(message.body)
+        data = message.body
         log = models.Log(
             routing_key=routing_key,
             data=data
