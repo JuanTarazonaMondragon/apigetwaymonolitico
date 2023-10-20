@@ -50,7 +50,7 @@ async def delete_element_by_id(db: AsyncSession, model, element_id):
     return element
 
 
-# Delivery functions ##################################################################################
+# Logs functions ##################################################################################
 async def get_delivery_list(db: AsyncSession):
     """Load all the orders from the database."""
     stmt = select(models.Delivery)

@@ -1,6 +1,26 @@
 version: '3'
 
 services:
+  # Service Logs
+  logs:
+    hostname: logs
+    container_name: macc-microservicios-logs
+    #build: ./logsws
+    image: macc-microservicios-logs
+    volumes:
+      - './logsws/app:/code/app'
+    ports:
+      - '18010:${UVICORN_PORT}'
+    environment:
+      - 'UVICORN_PORT=${UVICORN_PORT}'
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      network:
+        ipv4_address: '${SERVICE_LOGS_IP}'
+    restart: unless-stopped
+
   # Service Client
   client-r1:
     hostname: client-r1
