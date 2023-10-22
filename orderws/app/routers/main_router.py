@@ -1,0 +1,166 @@
+# -*- coding: utf-8 -*-
+"""FastAPI router definitions."""
+import logging
+from typing import List
+from fastapi import APIRouter, Depends, status, Header
+from sqlalchemy.ext.asyncio import AsyncSession
+from dependencies import get_db
+from sql import crud, schemas
+from routers import security
+from routers.router_utils import raise_and_log_error
+
+logger = logging.getLogger(__name__)
+router = APIRouter()
+
+
+@router.get(
+    "/",
+    summary="Health check endpoint",
+    response_model=schemas.Message,
+)
+async def health_check():
+    """Endpoint to check if everything started correctly."""
+    logger.debug("GET '/' endpoint called.")
+    return {
+        "detail": "OK"
+    }
+
+
+@router.post(
+    "/order",
+    response_model=schemas.Order,
+    summary="Create single order",
+    status_code=status.HTTP_201_CREATED,
+    tags=["Order"]
+)
+async def create_order(
+        order_schema: schemas.OrderPost,
+        db: AsyncSession = Depends(get_db),
+        token: str = Header(..., description="JWT Token in the Header")
+):
+    """Create single order endpoint."""
+    logger.debug("POST '/order' endpoint called.")
+    try:
+        #decodificar el token
+        payload = security.decode_token(token)
+        # validar fecha expiración del token
+        is_expirated = security.validar_fecha_expiracion(payload)
+        if(is_expirated):
+            raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
+        else:
+            order_schema.id_client = payload["id_client"]
+            db_order = await crud.create_order(db, order_schema)
+            return db_order
+    except Exception as exc:  # @ToDo: To broad exception
+        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error creating order: {exc}")
+
+
+@router.get(
+    "/order",
+    response_model=List[schemas.Order],
+    summary="Retrieve order list",
+    tags=["Order", "List"]  # Optional so it appears grouped in documentation
+)
+async def get_order_list(
+        db: AsyncSession = Depends(get_db),
+        token: str = Header(..., description="JWT Token in the Header")
+):
+    try:
+        """Retrieve order list"""
+        logger.debug("GET '/order' endpoint called.")
+        #decodificar el token
+        payload = security.decode_token(token)
+        # validar fecha expiración del token
+        is_expirated = security.validar_fecha_expiracion(payload)
+        if(is_expirated):
+            raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
+        else:
+            es_admin = security.validar_es_admin(payload)
+            if(es_admin):
+                order_list = await crud.get_orders_list(db)
+                return order_list
+            else:
+                raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
+    except Exception as exc:  # @ToDo: To broad exception
+        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error obtaining order list: {exc}")
+
+
+@router.get(
+    "/order/{order_id}",
+    summary="Retrieve single order by id",
+    responses={
+        status.HTTP_200_OK: {
+            "model": schemas.Order,
+            "description": "Requested Order."
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": schemas.Message, "description": "Order not found"
+        }
+    },
+    tags=['Order']
+)
+async def get_single_order(
+        order_id: int,
+        db: AsyncSession = Depends(get_db),
+        token: str = Header(..., description="JWT Token in the Header")
+):
+    """Retrieve single order by id"""
+    logger.debug("GET '/order/%i' endpoint called.", order_id)
+    try:
+        """Retrieve order list"""
+        logger.debug("GET '/order/%i' endpoint called.")
+        #decodificar el token
+        payload = security.decode_token(token)
+        # validar fecha expiración del token
+        is_expirated = security.validar_fecha_expiracion(payload)
+        if(is_expirated):
+            raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
+        else:
+            es_admin = security.validar_es_admin(payload)
+            client_id = payload["id_client"]
+            order = await crud.get_order(db, order_id)
+            if(es_admin==False and order.id_client!=client_id):
+                raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
+        if not order:
+            raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Order {order_id} not found")
+        return order
+    except Exception as exc:  # @ToDo: To broad exception
+        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error obtaining order: {exc}")
+   
+
+
+@router.get(
+    "/order/client/{client_id}",
+    summary="Retrieve client's orders by id",
+    responses={
+        status.HTTP_200_OK: {
+            "model": schemas.Order,
+            "description": "Requested Orders."
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": schemas.Message, "description": "Orders not found"
+        }
+    },
+    tags=['Orders'],
+)
+async def get_single_client(
+        client_id: int,
+        db: AsyncSession = Depends(get_db),
+        token: str = Header(..., description="JWT Token in the Header")
+):
+    """Retrieve client's orders by id"""
+    logger.debug("GET '/order/client/%i' endpoint called.", client_id)
+    payload = security.decode_token(token)
+    # validar fecha expiración del token
+    is_expirated = security.validar_fecha_expiracion(payload)
+    if(is_expirated):
+        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
+    else:
+        es_admin = security.validar_es_admin(payload)
+        client_id_token = payload["id_client"]
+        if(es_admin==False and client_id!=client_id_token):
+            raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
+    orders = await crud.get_clients_orders(db, client_id)
+    if not orders:
+        raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Client {client_id}'s orders not found")
+    return orders
