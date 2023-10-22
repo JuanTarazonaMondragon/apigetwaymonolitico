@@ -4,6 +4,24 @@ from sql.database import SessionLocal # pylint: disable=import-outside-toplevel
 from sql import crud
 from sql import models, schemas
 
+async def subscribe_channel():
+    # Define your RabbitMQ server connection parameters directly as keyword arguments
+    connection = await aio_pika.connect_robust(
+        host='rabbitmq',
+        port=5672,
+        virtualhost='/',
+        login='user',
+        password='user'
+    )
+    # Create a channel
+    global channel
+    channel = await connection.channel()
+    # Declare the exchange
+    global exchange_name
+    exchange_name = 'events'
+    global exchange
+    exchange = await channel.declare_exchange(name=exchange_name, type='topic', durable=True)
+
 async def on_pay_message(message):
     async with message.process():
         payment = json.loads(message.body)
@@ -31,24 +49,11 @@ async def on_pay_message(message):
             db_order = await crud.change_order_status(db, payment['id_order'], status)
 
 async def subscribe_payments():
-    # Define your RabbitMQ server connection parameters directly as keyword arguments
-    connection = await aio_pika.connect_robust(
-        host='rabbitmq',
-        port=5672,
-        virtualhost='/',
-        login='user',
-        password='user'
-    )
-    # Create a channel
-    channel = await connection.channel()
-    # Declare the exchange
-    exchange_name = 'events'
-    exchange = await channel.declare_exchange(name=exchange_name, type='topic', durable=True)
-    # Create a random queue with an auto-generated name
-    queue_name = "order.pay"
+    # Create a queue
+    queue_name = "order.payed"
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
-    routing_key = "order.pay"
+    routing_key = "order.payed"
     await queue.bind(exchange=exchange_name, routing_key=routing_key)
     # Set up a message consumer
     async with queue.iterator() as queue_iter:
@@ -59,7 +64,7 @@ async def subscribe_payments():
 async def on_piece_message(message):
     async with message.process():
         piece_recieve = json.loads(message.body)
-        db = SessionLocal() # Esto es una puta guarrada, idea de Andoni, hay que preguntar si es legal o no. Ojo, pero al menos funciona, GRANDE ANDONI!
+        db = SessionLocal()
         db_piece = await crud.change_piece_status(db, piece_recieve['id_piece'], models.Piece.STATUS_PRODUCED)
         db_pieces = await crud.get_order_pieces(db, piece_recieve['id_order'])
         order_finished = True
@@ -79,20 +84,7 @@ async def on_piece_message(message):
 
 
 async def subscribe_pieces():
-    # Define your RabbitMQ server connection parameters directly as keyword arguments
-    connection = await aio_pika.connect_robust(
-        host='rabbitmq',
-        port=5672,
-        virtualhost='/',
-        login='user',
-        password='user'
-    )
-    # Create a channel
-    channel = await connection.channel()
-    # Declare the exchange
-    exchange_name = 'events'
-    exchange = await channel.declare_exchange(name=exchange_name, type='topic', durable=True)
-    # Create a random queue with an auto-generated name
+    # Create a queue
     queue_name = "piece.produced"
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
@@ -107,26 +99,13 @@ async def subscribe_pieces():
 async def on_delivered_message(message):
     async with message.process():
         delivery = json.loads(message.body)
-        db = SessionLocal() # Esto es una puta guarrada, idea de Andoni, hay que preguntar si es legal o no. Ojo, pero al menos funciona, GRANDE ANDONI!
+        db = SessionLocal()
         db_piece = await crud.change_order_status(db, delivery['id_order'], models.Order.STATUS_DELIVERED)
         await db.close()
 
 
 async def subscribe_delivered():
-    # Define your RabbitMQ server connection parameters directly as keyword arguments
-    connection = await aio_pika.connect_robust(
-        host='rabbitmq',
-        port=5672,
-        virtualhost='/',
-        login='user',
-        password='user'
-    )
-    # Create a channel
-    channel = await connection.channel()
-    # Declare the exchange
-    exchange_name = 'events'
-    exchange = await channel.declare_exchange(name=exchange_name, type='topic', durable=True)
-    # Create a random queue with an auto-generated name
+    # Create a queue
     queue_name = "order.delivered"
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
@@ -141,26 +120,13 @@ async def subscribe_delivered():
 async def on_delivering_message(message):
     async with message.process():
         delivery = json.loads(message.body)
-        db = SessionLocal() # Esto es una puta guarrada, idea de Andoni, hay que preguntar si es legal o no. Ojo, pero al menos funciona, GRANDE ANDONI!
+        db = SessionLocal()
         db_piece = await crud.change_order_status(db, delivery['id_order'], models.Order.STATUS_DELIVERING)
         await db.close()
 
 
 async def subscribe_delivering():
-    # Define your RabbitMQ server connection parameters directly as keyword arguments
-    connection = await aio_pika.connect_robust(
-        host='rabbitmq',
-        port=5672,
-        virtualhost='/',
-        login='user',
-        password='user'
-    )
-    # Create a channel
-    channel = await connection.channel()
-    # Declare the exchange
-    exchange_name = 'events'
-    exchange = await channel.declare_exchange(name=exchange_name, type='topic', durable=True)
-    # Create a random queue with an auto-generated name
+    # Create a queue
     queue_name = "order.delivering"
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
@@ -173,19 +139,6 @@ async def subscribe_delivering():
 
 
 async def publish(message_body, routing_key):
-    # Define your RabbitMQ server connection parameters directly as keyword arguments
-    connection = await aio_pika.connect_robust(
-        host='rabbitmq',
-        port=5672,
-        virtualhost='/',
-        login='user',
-        password='user'
-    )
-    # Create a channel
-    channel = await connection.channel()
-    # Declare the exchange
-    exchange_name = 'events'
-    exchange = await channel.declare_exchange(name=exchange_name, type='topic', durable=True)
     # Publish the message to the exchange
     await exchange.publish(
         aio_pika.Message(

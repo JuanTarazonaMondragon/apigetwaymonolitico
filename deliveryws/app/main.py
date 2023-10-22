@@ -48,6 +48,7 @@ async def startup_event():
     logger.info("Creating database tables")
     async with database.engine.begin() as conn:
         await conn.run_sync(models.Base.metadata.create_all)
+    await rabbitmq.subscribe_channel()
     asyncio.create_task(rabbitmq.subscribe_producing())
     asyncio.create_task(rabbitmq.subscribe_produced())
 

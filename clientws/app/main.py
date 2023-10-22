@@ -3,6 +3,7 @@
 import logging
 import os
 from fastapi import FastAPI
+from routers import security
 from routers import main_router
 from sql import models, database
 
@@ -47,6 +48,8 @@ async def startup_event():
     logger.info("Creating database tables")
     async with database.engine.begin() as conn:
         await conn.run_sync(models.Base.metadata.create_all)
+    ## GENERAR CLAVES
+    # security.generar_claves()
 
 
 # Main #############################################################################################

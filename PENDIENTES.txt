@@ -1,5 +1,5 @@
 Acceso a servicios mediante "localhost:service_port" o solo mediante API Gateway?
 
-subir .db a gitignore
+añadir .db a gitignore
 
 __pycache__ a gitignore

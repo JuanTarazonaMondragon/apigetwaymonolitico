@@ -7,3 +7,6 @@ aiosqlite==0.17.0
 coloredlogs==15.0.1
 PyYAML==6.0
 pika==1.2.0
+flask==3.0.0
+PyJWT==2.8.0
+cryptography

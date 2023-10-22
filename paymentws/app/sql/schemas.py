@@ -16,7 +16,8 @@ class Message(BaseModel):
 class PaymentBase(BaseModel):
     """Payment base schema definition."""
     id_client: str = Field(
-        description="The ID of the client."
+        description="The ID of the client.",
+        default=None
     )
     movement: str = Field(
         description="The movement of the client."

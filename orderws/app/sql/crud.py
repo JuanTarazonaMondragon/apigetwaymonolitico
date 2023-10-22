@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.sql import func
 from routers.rabbitmq import publish
 from . import models
 import json
@@ -96,7 +97,7 @@ async def create_order(db: AsyncSession, order):
     }
     # Crear evento con nueva order, indicando ID de cliente y cantidad de piezas.
     message_body = json.dumps(data)
-    routing_key = "order.create"
+    routing_key = "order.created"
     await publish(message_body, routing_key)
     return db_order
 
@@ -134,6 +135,7 @@ async def change_piece_status(db: AsyncSession, piece_id, status):
     """Change piece status in the database."""
     db_piece = await get_piece(db, piece_id)
     db_piece.status_piece = status
+    db_piece.manufacturing_date = func.now()
     await db.commit()
     await db.refresh(db_piece)
     return db_piece

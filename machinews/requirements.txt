@@ -8,3 +8,5 @@ PyYAML==6.0
 requests==2.31.0
 aio-pika==9.3.0
 asyncio==3.4.3
+PyJWT==2.8.0
+cryptography

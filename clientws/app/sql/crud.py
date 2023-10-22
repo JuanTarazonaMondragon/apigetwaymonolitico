@@ -39,6 +39,14 @@ async def get_element_by_id(db: AsyncSession, model, element_id):
     element = await db.get(model, element_id)
     return element
 
+async def get_element_by_username_and_pass(db: AsyncSession, model, username, password):
+    """Retrieve any DB element by id."""
+    if username is None:
+        return None
+    """Obtener un cliente por nombre de usuario y contraseña."""
+    stmt = select(model).filter(model.username == username, model.password == password)
+    element = await get_element_statement_result(db, stmt)
+    return element
 
 # DELETE
 async def delete_element_by_id(db: AsyncSession, model, element_id):
@@ -62,6 +70,10 @@ async def get_client(db: AsyncSession, client_id):
     """Load a client from the database."""
     return await get_element_by_id(db, models.Client, client_id)
 
+async def get_client_by_username_and_pass(db: AsyncSession, username, password):
+    """Load a client from the database."""
+    return await get_element_by_username_and_pass(db, models.Client, username, password)
+
 
 async def create_client(db: AsyncSession, client):
     """Persist a new client into the database."""
@@ -69,6 +81,7 @@ async def create_client(db: AsyncSession, client):
         username=client.username,
         email=client.email,
         password=client.password,
+        role = client.role
     )
     db.add(db_client)
     await db.commit()

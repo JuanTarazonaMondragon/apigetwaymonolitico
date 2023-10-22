@@ -44,6 +44,7 @@ class Client(BaseModel):
     email = Column(TEXT, nullable=False)
     username = Column(TEXT, nullable=False)
     password = Column(TEXT, nullable=False, default="No description")
+    role = Column(Integer, nullable=False, default=0) # 0 = CLIENT    1 = ADMIN
 
     def as_dict(self):
         """Return the client item as dict."""

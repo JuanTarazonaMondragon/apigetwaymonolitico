@@ -2,10 +2,11 @@
 """FastAPI router definitions."""
 import logging
 from typing import List
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from dependencies import get_db
 from sql import crud, schemas
+from routers import security
 from routers.router_utils import raise_and_log_error
 
 logger = logging.getLogger(__name__)
@@ -25,24 +26,6 @@ async def health_check():
     }
 
 
-"""@router.post(
-    "/payment",
-    response_model=schemas.Payment,
-    summary="Create single payment",
-    status_code=status.HTTP_201_CREATED,
-    tags=["Payment"]
-)
-async def create_payment(
-        payment_schema: schemas.PaymentBase,
-        db: AsyncSession = Depends(get_db)
-):
-    logger.debug("POST '/payment' endpoint called.")
-    try:
-        db_payment = await crud.create_payment(db, payment_schema)
-        return db_payment
-    except Exception as exc:  # @ToDo: To broad exception
-        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error creating payment: {exc}")"""
-
 @router.post(
     "/payment/deposit",
     response_model=schemas.Payment,
@@ -52,11 +35,18 @@ async def create_payment(
 )
 async def create_payment(
         payment_schema: schemas.PaymentBase,
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        token: str = Header(..., description="JWT Token in the Header")
 ):
     """Create single deposit endpoint."""
     logger.debug("POST '/payment/deposit' endpoint called.")
     try:
+        payload = security.decode_token(token)
+        # validar fecha expiración del token
+        is_expirated = security.validar_fecha_expiracion(payload)
+        if(is_expirated):
+            raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
+        payment_schema.id_client = payload["id_client"]
         db_payment = await crud.create_deposit(db, payment_schema)
         return db_payment
     except Exception as exc:  # @ToDo: To broad exception
@@ -70,10 +60,20 @@ async def create_payment(
     tags=["Payment", "List"]  # Optional so it appears grouped in documentation
 )
 async def get_payment_list(
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        token: str = Header(..., description="JWT Token in the Header")
 ):
     """Retrieve payment list"""
     logger.debug("GET '/payment' endpoint called.")
+    payload = security.decode_token(token)
+    # validar fecha expiración del token
+    is_expirated = security.validar_fecha_expiracion(payload)
+    if(is_expirated):
+        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
+    else:
+        es_admin = security.validar_es_admin(payload)
+        if(es_admin==False):
+            raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
     payment_list = await crud.get_payments_list(db)
     return payment_list
 
@@ -94,10 +94,22 @@ async def get_payment_list(
 )
 async def get_single_payment(
         payment_id: int,
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        token: str = Header(..., description="JWT Token in the Header")
 ):
     """Retrieve single payment by id"""
     logger.debug("GET '/payment/%i' endpoint called.", payment_id)
+    payload = security.decode_token(token)
+    # validar fecha expiración del token
+    is_expirated = security.validar_fecha_expiracion(payload)
+    if(is_expirated):
+        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
+    else:
+        es_admin = security.validar_es_admin(payload)
+        client_id = payload["id_client"]
+        payment = await crud.get_order(db, payment_id)
+        if(es_admin==False and payment.id_client!=client_id):
+            raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
     payment = await crud.get_payment(db, payment_id)
     if not payment:
         raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Payment {payment_id} not found")
@@ -120,10 +132,21 @@ async def get_single_payment(
 )
 async def get_single_client(
         client_id: int,
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
+        token: str = Header(..., description="JWT Token in the Header")
 ):
     """Retrieve client's payments by id"""
     logger.debug("GET '/payment/client/%i' endpoint called.", client_id)
+    payload = security.decode_token(token)
+    # validar fecha expiración del token
+    is_expirated = security.validar_fecha_expiracion(payload)
+    if(is_expirated):
+        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
+    else:
+        es_admin = security.validar_es_admin(payload)
+        client_id_token = payload["id_client"]
+        if(es_admin==False and client_id!=client_id_token):
+            raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
     payments = await crud.get_clients_payments(db, client_id)
     if not payments:
         raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Client {client_id}'s payments not found")

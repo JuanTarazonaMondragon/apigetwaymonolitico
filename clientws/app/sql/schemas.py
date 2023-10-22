@@ -22,6 +22,11 @@ class ClientBase(BaseModel):
         default="example@gmail.com",
         example="example@gmail.com"
     )
+    role: int = Field(
+        description="The role of the client.", # 0 === CLIENT
+        default=0,                           # 1 === ADMIN
+        example=0
+    )
 
 
 class Client(ClientBase):
@@ -43,4 +48,17 @@ class ClientPost(ClientBase):
         description="The password of the client.",
         default="asdfasdf3423",
         example="asdfasdf3423"
+    )
+
+class TokenRequest(BaseModel):
+    """Client base schema definition."""
+    username: str = Field(
+        description="The username of the client.",
+        default=None,
+        example="itziariraarr"
+    )
+    password: str = Field(
+        description="The email of the client.",
+        default="example@gmail.com",
+        example="example@gmail.com"
     )
