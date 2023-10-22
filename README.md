@@ -14,3 +14,8 @@ En su lugar, primero genera las imagenes y se usan dichas imagenes
 para construir los contenedores.
 
 ## MIENTRAS QUE NO HAYA REPLICAS ACTIVADAS NO HACE FALTA LO ANTERIOR
+
+## Usuario y Contraseña Administrador:
+
+Username: joxemai
+Password: joxemai

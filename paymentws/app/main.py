@@ -3,7 +3,7 @@
 import logging
 import os
 from fastapi import FastAPI
-from routers import main_router, rabbitmq
+from routers import main_router, rabbitmq, security
 from sql import models, database
 import asyncio
 
@@ -48,6 +48,7 @@ async def startup_event():
     logger.info("Creating database tables")
     async with database.engine.begin() as conn:
         await conn.run_sync(models.Base.metadata.create_all)
+    await security.get_public_key()
     await rabbitmq.subscribe_channel()
     asyncio.create_task(rabbitmq.subscribe())
 

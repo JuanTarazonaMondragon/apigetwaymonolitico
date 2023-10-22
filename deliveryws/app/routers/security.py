@@ -8,9 +8,16 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 from routers.router_utils import raise_and_log_error
 import json
+import requests
 
 logger = logging.getLogger(__name__)
 
+public_key = ""
+
+async def get_public_key():
+    global public_key
+    response = requests.get("http://192.168.18.11:8001/client/get/key")
+    public_key = response.text.strip('"').replace("\\n", "\n")
 
 def generar_claves():
     private_key = rsa.generate_private_key(
@@ -44,13 +51,10 @@ def generar_claves():
 
 def decode_token(token:str):
     try:
-        with open('public_key.pem', 'rb') as public_key_file:
-                public_key_client_pem = public_key_file.read()
-
-        payload = json.loads(json.dumps(jwt.decode(token, public_key_client_pem, ['RS256'])))
+        payload = json.loads(json.dumps(jwt.decode(token, public_key, ['RS256'])))
         return payload
     except Exception as exc:  # @ToDo: To broad exception
-        raise_and_log_error(logger, status.HTTP_403_CONFLICT, f"Error decoding the token: {exc}")
+        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error decoding the token: {exc}")
 
 def validar_fecha_expiracion(payload:dict):
     # Obtiene la fecha de expiración del token
@@ -68,9 +72,6 @@ def validar_fecha_expiracion(payload:dict):
 def validar_es_admin(payload:dict):
     # Obtiene la fecha de expiración del token
     role = payload.get("role")
-    print("comprobacionnnnnnn")
-    print(type(role))
-    print(role)
     # Convierte el tiempo Unix en una fecha y hora
     # Comprueba si el token ha expirado
     if role==1:

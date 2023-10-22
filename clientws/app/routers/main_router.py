@@ -94,7 +94,6 @@ async def get_client_list(
         }
     },
     tags=['Client']
-    
 )
 async def get_single_client(
         client_id: int,
@@ -118,7 +117,6 @@ async def get_single_client(
     if not client:
         raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Client {client_id} not found")
     return client
-
 
 
 @router.post(
@@ -162,6 +160,25 @@ async def get_token(
     except Exception as exc:
         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error generando token: {exc}")
 
+
+@router.get(
+    "/client/get/key",
+    summary="Retrieve key",
+    responses={
+        status.HTTP_200_OK: {
+            "model": schemas.Message,
+            "description": "Requested Key."
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": schemas.Message, "description": "Key not found"
+        }
+    },
+    tags=['Client']
+)
+async def get_public_key():
+    """Retrieve public key"""
+    logger.debug("GET '/client/get/key' endpoint called.")
+    return security.get_public_key()
 
 
 # Función para autenticar al usuario (solo como ejemplo)

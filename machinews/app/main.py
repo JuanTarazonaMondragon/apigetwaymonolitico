@@ -3,7 +3,7 @@
 import logging
 import os
 from fastapi import FastAPI
-from routers import main_router, rabbitmq
+from routers import main_router, rabbitmq, security
 import asyncio
 
 # Configure logging ################################################################################
@@ -45,6 +45,7 @@ app.include_router(main_router.router)
 async def startup_event():
     """Configuration to be executed when FastAPI server starts."""
     logger.info("Creating database tables")
+    await security.get_public_key()
     await rabbitmq.subscribe_channel()
     asyncio.create_task(rabbitmq.subscribe())
 

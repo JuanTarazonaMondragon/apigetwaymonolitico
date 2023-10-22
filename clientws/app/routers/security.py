@@ -52,6 +52,10 @@ def decode_token(token:str):
     except Exception as exc:  # @ToDo: To broad exception
         raise_and_log_error(logger, status.HTTP_403_CONFLICT, f"Error decoding the token: {exc}")
 
+def get_public_key():
+    with open('public_key.pem', 'rb') as public_key_file:
+        return public_key_file.read()
+
 def validar_fecha_expiracion(payload:dict):
     # Obtiene la fecha de expiración del token
     exp_timestamp_str = payload.get("fecha_expiracion")
@@ -68,9 +72,6 @@ def validar_fecha_expiracion(payload:dict):
 def validar_es_admin(payload:dict):
     # Obtiene la fecha de expiración del token
     role = payload.get("role")
-    print("comprobacionnnnnnn")
-    print(type(role))
-    print(role)
     # Convierte el tiempo Unix en una fecha y hora
     # Comprueba si el token ha expirado
     if role==1:
