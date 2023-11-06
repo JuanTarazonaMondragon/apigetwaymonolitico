@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql import func
-from routers.rabbitmq import publish
+from routers.rabbitmq import publish_event, publish_command
 from . import models
 import json
 
@@ -85,20 +85,18 @@ async def create_order(db: AsyncSession, order):
         number_of_pieces=order.number_of_pieces,
         description=order.description,
         id_client=order.id_client,
-        status_order=models.Order.STATUS_CREATED
+        status_order=models.Order.STATUS_DELIVERY_PENDING
     )
     db.add(db_order)
     await db.commit()
     await db.refresh(db_order)
     data = {
         "id_order": db_order.id_order,
-        "id_client": db_order.id_client,
-        "movement": movement
+        "id_client": db_order.id_client
     }
-    # Crear evento con nueva order, indicando ID de cliente y cantidad de piezas.
     message_body = json.dumps(data)
-    routing_key = "order.created"
-    await publish(message_body, routing_key)
+    routing_key = "delivery.check"
+    await publish_command(message_body, routing_key)
     return db_order
 
 
@@ -127,7 +125,7 @@ async def create_piece(db: AsyncSession, piece):
     # Crear evento con nueva order, indicando ID de cliente y cantidad de piezas.
     message_body = json.dumps(data)
     routing_key = "piece.created"
-    await publish(message_body, routing_key)
+    await publish_event(message_body, routing_key)
     return db_piece
 
 

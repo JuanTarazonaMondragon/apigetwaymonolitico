@@ -37,8 +37,9 @@ class BaseModel(Base):
 
 class Order(BaseModel):
     """Orders database table representation."""
-    STATUS_CREATED = "Created"
-    STATUS_PAYED = "Payed"
+    STATUS_DELIVERY_PENDING = "DeliveryPending"
+    STATUS_PAYMENT_PENDING = "PaymentPending"
+    STATUS_DELIVERY_CANCELING = "DeliveryCanceling"
     STATUS_CANCELED = "Canceled"
     STATUS_QUEUED = "Queued"
     STATUS_PRODUCED = "Produced"
