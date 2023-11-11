@@ -17,14 +17,16 @@ class LogBase(BaseModel):
         description="The data of the message.",
         default=""
     )
+    exchange: str = Field(
+        description="The exchange name of the message.",
+        default=""
+    )
     routing_key: str = Field(
         description="The routing key of the message.",
-        default="",
-        example="Order.crate"
+        default=""
     )
     id_log: int = Field(
         description="Primary key/identifier of the log.",
-        default=None,
-        example=1
+        default=None
     )
 

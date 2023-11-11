@@ -17,20 +17,20 @@ async def subscribe_channel():
     global channel
     channel = await connection.channel()
     # Declare the exchange
-    global exchange_event_name
-    exchange_event_name = 'events'
-    global exchange_event
-    exchange_event = await channel.declare_exchange(name=exchange_event_name, type='topic', durable=True)
+    global exchange_events_name
+    exchange_events_name = 'events'
+    global exchange_events
+    exchange_events = await channel.declare_exchange(name=exchange_events_name, type='topic', durable=True)
     
-    global exchange_command_name
-    exchange_command_name = 'commands'
-    global exchange_command
-    exchange_command = await channel.declare_exchange(name=exchange_command_name, type='topic', durable=True)
+    global exchange_commands_name
+    exchange_commands_name = 'commands'
+    global exchange_commands
+    exchange_commands = await channel.declare_exchange(name=exchange_commands_name, type='topic', durable=True)
     
-    global exchange_response_name
-    exchange_response_name = 'responses'
-    global exchange_response
-    exchange_response = await channel.declare_exchange(name=exchange_response_name, type='topic', durable=True)
+    global exchange_responses_name
+    exchange_responses_name = 'responses'
+    global exchange_responses
+    exchange_responses = await channel.declare_exchange(name=exchange_responses_name, type='topic', durable=True)
 
 
 async def on_client_created_message(message):
@@ -52,7 +52,7 @@ async def subscribe_client_created():
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
     routing_key = "client.created"
-    await queue.bind(exchange=exchange_event_name, routing_key=routing_key)
+    await queue.bind(exchange=exchange_events_name, routing_key=routing_key)
     # Set up a message consumer
     async with queue.iterator() as queue_iter:
         async for message in queue_iter:
@@ -73,7 +73,7 @@ async def subscribe_producing():
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
     routing_key = "order.producing"
-    await queue.bind(exchange=exchange_event_name, routing_key=routing_key)
+    await queue.bind(exchange=exchange_events_name, routing_key=routing_key)
     # Set up a message consumer
     async with queue.iterator() as queue_iter:
         async for message in queue_iter:
@@ -96,7 +96,7 @@ async def subscribe_produced():
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
     routing_key = "order.produced"
-    await queue.bind(exchange=exchange_event_name, routing_key=routing_key)
+    await queue.bind(exchange=exchange_events_name, routing_key=routing_key)
     # Set up a message consumer
     async with queue.iterator() as queue_iter:
         async for message in queue_iter:
@@ -148,7 +148,7 @@ async def subscribe_delivery_check():
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
     routing_key = "delivery.check"
-    await queue.bind(exchange=exchange_command_name, routing_key=routing_key)
+    await queue.bind(exchange=exchange_commands_name, routing_key=routing_key)
     # Set up a message consumer
     async with queue.iterator() as queue_iter:
         async for message in queue_iter:
@@ -176,7 +176,7 @@ async def subscribe_delivery_cancel():
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
     routing_key = "delivery.cancel"
-    await queue.bind(exchange=exchange_command_name, routing_key=routing_key)
+    await queue.bind(exchange=exchange_commands_name, routing_key=routing_key)
     # Set up a message consumer
     async with queue.iterator() as queue_iter:
         async for message in queue_iter:
@@ -185,7 +185,7 @@ async def subscribe_delivery_cancel():
 
 async def publish_event(message_body, routing_key):
     # Publish the message to the exchange
-    await exchange_event.publish(
+    await exchange_events.publish(
         aio_pika.Message(
             body=message_body.encode(),
             content_type="text/plain"
@@ -195,7 +195,7 @@ async def publish_event(message_body, routing_key):
 
 async def publish_response(message_body, routing_key):
     # Publish the message to the exchange
-    await exchange_response.publish(
+    await exchange_responses.publish(
         aio_pika.Message(
             body=message_body.encode(),
             content_type="text/plain"
