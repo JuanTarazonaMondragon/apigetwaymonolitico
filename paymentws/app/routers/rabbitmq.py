@@ -16,12 +16,23 @@ async def subscribe_channel():
     global channel
     channel = await connection.channel()
     # Declare the exchange
-    global exchange_name
-    exchange_name = 'events'
-    global exchange
-    exchange = await channel.declare_exchange(name=exchange_name, type='topic', durable=True)
+    global exchange_event_name
+    exchange_event_name = 'events'
+    global exchange_event
+    exchange_event = await channel.declare_exchange(name=exchange_event_name, type='topic', durable=True)
+    
+    global exchange_command_name
+    exchange_command_name = 'commands'
+    global exchange_command
+    exchange_command = await channel.declare_exchange(name=exchange_command_name, type='topic', durable=True)
+    
+    global exchange_response_name
+    exchange_response_name = 'responses'
+    global exchange_response
+    exchange_response = await channel.declare_exchange(name=exchange_response_name, type='topic', durable=True)
 
-async def on_message(message):
+
+async def on_message_payment_check(message):
     async with message.process():
         payment = json.loads(message.body)
         db = SessionLocal()
@@ -35,27 +46,39 @@ async def on_message(message):
         await db.close()
         data = {
             "id_order": payment['id_order'],
-            "payment_status": payment_status
+            "status": payment_status
         }
         message_body = json.dumps(data)
-        routing_key = "order.payed"
-        await publish(message_body, routing_key)
+        routing_key = "payment.checked"
+        await publish_response(message_body, routing_key)
 
-async def subscribe():
+
+async def subscribe_payment_check():
     # Create queue
-    queue_name = "order.created"
+    queue_name = "payment.check"
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
-    routing_key = "order.created"
-    await queue.bind(exchange=exchange_name, routing_key=routing_key)
+    routing_key = "payment.check"
+    await queue.bind(exchange=exchange_command_name, routing_key=routing_key)
     # Set up a message consumer
     async with queue.iterator() as queue_iter:
         async for message in queue_iter:
-            await on_message(message)
+            await on_message_payment_check(message)
 
-async def publish(message_body, routing_key):
+
+async def publish_event(message_body, routing_key):
     # Publish the message to the exchange
-    await exchange.publish(
+    await exchange_event.publish(
+        aio_pika.Message(
+            body=message_body.encode(),
+            content_type="text/plain"
+        ),
+        routing_key=routing_key)
+
+
+async def publish_response(message_body, routing_key):
+    # Publish the message to the exchange
+    await exchange_response.publish(
         aio_pika.Message(
             body=message_body.encode(),
             content_type="text/plain"

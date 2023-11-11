@@ -43,7 +43,9 @@ class Client(BaseModel):
     id_client = Column(Integer, primary_key=True)
     email = Column(TEXT, nullable=False)
     username = Column(TEXT, nullable=False)
-    password = Column(TEXT, nullable=False, default="No description")
+    password = Column(TEXT, nullable=False)
+    address = Column(TEXT, nullable=False)
+    postal_code = Column(Integer, nullable=False)
     role = Column(Integer, nullable=False, default=0) # 0 = CLIENT    1 = ADMIN
 
     def as_dict(self):

@@ -28,7 +28,7 @@ async def subscribe_channel():
     exchange_command = await channel.declare_exchange(name=exchange_command_name, type='topic', durable=True)
     
     global exchange_response_name
-    exchange_response_name = 'response'
+    exchange_response_name = 'responses'
     global exchange_response
     exchange_response = await channel.declare_exchange(name=exchange_response_name, type='topic', durable=True)
 
@@ -112,7 +112,7 @@ async def subscribe_delivering():
 
 async def publish_event(message_body, routing_key):
     # Publish the message to the exchange
-    await exchange_event_name.publish(
+    await exchange_event.publish(
         aio_pika.Message(
             body=message_body.encode(),
             content_type="text/plain"
@@ -187,7 +187,7 @@ async def subscribe_payment_checked():
     # Set up a message consumer
     async with queue.iterator() as queue_iter:
         async for message in queue_iter:
-            await on_delivery_checked_message(message)
+            await on_payment_checked_message(message)
 
 
 async def on_delivery_cancelled_message(message):
@@ -213,7 +213,7 @@ async def subscribe_delivery_cancelled():
 
 async def publish_command(message_body, routing_key):
     # Publish the message to the exchange
-    await exchange_command_name.publish(
+    await exchange_command.publish(
         aio_pika.Message(
             body=message_body.encode(),
             content_type="text/plain"

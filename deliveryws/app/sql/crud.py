@@ -52,38 +52,54 @@ async def delete_element_by_id(db: AsyncSession, model, element_id):
 
 # Delivery functions ##################################################################################
 async def get_delivery_list(db: AsyncSession):
-    """Load all the orders from the database."""
+    """Load all the deliveries from the database."""
     stmt = select(models.Delivery)
     deliveries = await get_list_statement_result(db, stmt)
     return deliveries
 
 
 async def get_delivery(db: AsyncSession, delivery_id):
-    """Load an order from the database."""
+    """Load a delivery from the database."""
     return await get_element_by_id(db, models.Delivery, delivery_id)
 
 
+async def get_client(db: AsyncSession, client_id):
+    """Load a client from the database."""
+    return await get_element_by_id(db, models.Client, client_id)
+
+
 async def get_delivery_by_order(db: AsyncSession, order_id):
-    """Load an order from the database."""
+    """Load a delivery from the database."""
     stmt = select(models.Delivery).where(models.Delivery.id_order == order_id)
     delivery = await get_list_statement_result(db, stmt)
     return delivery[0]
 
-
-async def create_delivery(db: AsyncSession, delivery):
-    """Persist a new order into the database."""
-
-    db_delivery = models.Delivery(
-        id_order=delivery['id_order'],
-        status_delivery=models.Delivery.STATUS_CREATED,
-        name="",
-        address=""
+async def store_client(db: AsyncSession, client):
+    """Persist a new client into the database."""
+    db_client = models.Client(
+        id_client=client.id_client,
+        address=client.address,
+        postal_code=client.postal_code
     )
+    db.add(db_client)
+    await db.commit()
+    await db.refresh(db_client)
+    return db_client
 
+async def check_address(db: AsyncSession, db_client):
+    """Persist a new client into the database."""
+    provincia = db_client.postal_code // 1000 # Extraer código de provincia del código postal
+    if (provincia == 1 or provincia == 20 or provincia == 48):
+        address_check = True
+    else:
+        address_check = False
+    return address_check
+
+async def create_delivery(db: AsyncSession, db_delivery):
+    """Persist a new order into the database."""
     db.add(db_delivery)
     await db.commit()
     await db.refresh(db_delivery)
-
     return db_delivery
 
 

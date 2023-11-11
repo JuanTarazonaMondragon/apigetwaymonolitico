@@ -5,6 +5,8 @@ from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from . import models
+import json
+from routers.rabbitmq import publish_event
 
 logger = logging.getLogger(__name__)
 
@@ -81,9 +83,19 @@ async def create_client(db: AsyncSession, client):
         username=client.username,
         email=client.email,
         password=client.password,
+        address=client.address,
+        postal_code=client.postal_code,
         role = client.role
     )
     db.add(db_client)
     await db.commit()
     await db.refresh(db_client)
+    data = {
+        "id_client": db_client.id_client,
+        "address": db_client.address,
+        "postal_code": db_client.postal_code
+    }
+    message_body = json.dumps(data)
+    routing_key = "client.created"
+    await publish_event(message_body, routing_key)
     return db_client

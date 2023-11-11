@@ -13,15 +13,15 @@ class Message(BaseModel):
 
 class DeliveryBase(BaseModel):
     """Delivery base schema definition."""
-    name: str = Field(
-        description="The name of the person that will recieve the package.",
-        default="No name",
-        example="Luis"
-    )
     address: str = Field(
         description="The address where the packege will be recieved.",
         default="No address",
         example="Calle x, 1B"
+    )
+    postal_code: int = Field(
+        description="The postal code where the packege will be recieved.",
+        default="No postal code",
+        example="20000"
     )
     id_order: int = Field(
         description="Primary key/identifier of the order.",
@@ -48,3 +48,20 @@ class Delivery(DeliveryBase):
         """ORM configuration."""
         orm_mode = True
 
+class ClientBase(BaseModel):
+    """Delivery base schema definition."""
+    id_client: str = Field(
+        description="The name of the person that will recieve the package.",
+        default="No name",
+        example="Luis"
+    )
+    address: str = Field(
+        description="The address where the packege will be recieved.",
+        default="No address",
+        example="Calle x, 1B"
+    )
+    postal_code: int = Field(
+        description="The postal code where the packege will be recieved.",
+        default="No postal code",
+        example="20000"
+    )

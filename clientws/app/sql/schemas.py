@@ -22,6 +22,16 @@ class ClientBase(BaseModel):
         default="example@gmail.com",
         example="example@gmail.com"
     )
+    address: str = Field(
+        description="The address of the client.",
+        default="puticlub manoli",
+        example="puticlub manoli"
+    )
+    postal_code: str = Field(
+        description="The postal code of the client.",
+        default="20000",
+        example="20000"
+    )
     role: int = Field(
         description="The role of the client.", # 0 === CLIENT
         default=0,                           # 1 === ADMIN

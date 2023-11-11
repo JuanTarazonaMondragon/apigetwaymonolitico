@@ -50,7 +50,7 @@ class Order(BaseModel):
     id_order = Column(Integer, primary_key=True)
     number_of_pieces = Column(Integer, nullable=False)
     description = Column(TEXT, nullable=False, default="No description")
-    status_order = Column(String(256), nullable=False, default=STATUS_CREATED)
+    status_order = Column(String(256), nullable=False)
     id_client = Column(Integer, nullable=False)
 
     pieces = relationship("Piece", back_populates="order", lazy="joined")

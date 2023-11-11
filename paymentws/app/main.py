@@ -50,7 +50,7 @@ async def startup_event():
         await conn.run_sync(models.Base.metadata.create_all)
     await security.get_public_key()
     await rabbitmq.subscribe_channel()
-    asyncio.create_task(rabbitmq.subscribe())
+    asyncio.create_task(rabbitmq.subscribe_payment_check())
 
 
 # Main #############################################################################################

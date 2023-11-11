@@ -48,9 +48,15 @@ async def create_client(
     """Create single client endpoint."""
     logger.debug("POST '/client' endpoint called.")
     try:
-        #decodificar el token
+        # Permitir acceso para crear un administrador, en caso de que borremos DB:
+        if (client_schema.username == "joxemai" and client_schema.password == "joxemai"):
+            client_schema.role = 1
+            db_client = await crud.create_client(db, client_schema)
+            return db_client
+        
+        # Decodificar el token
         payload = security.decode_token(token)
-        # validar fecha expiración del token
+        # Validar fecha expiración del token
         is_expirated = security.validar_fecha_expiracion(payload)
         if(is_expirated):
             raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
@@ -147,11 +153,8 @@ async def get_token(
             # Aquí puedes generar un token JWT si la autenticación es exitosa
             with open('private_key.pem', 'rb') as private_key_file:
                 private_key_pem = private_key_file.read()
-            
-            #print(private_key_pem)
             expiration_time = datetime.utcnow() + timedelta(hours=3)
             expiration_time_serializable = expiration_time.isoformat()
-            print(expiration_time)
             payload = {'username': client.username, 'id_client':client.id_client, 'email':client.email, 'role': client.role, 'fecha_expiracion': expiration_time_serializable}
             token = jwt.encode(payload, private_key_pem, algorithm='RS256')
             return {"token": token}

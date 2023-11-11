@@ -3,8 +3,7 @@
 import logging
 import os
 from fastapi import FastAPI
-from routers import security
-from routers import main_router
+from routers import main_router, rabbitmq, security
 from sql import models, database
 
 # Configure logging ################################################################################
@@ -50,6 +49,7 @@ async def startup_event():
         await conn.run_sync(models.Base.metadata.create_all)
     ## GENERAR CLAVES
     # security.generar_claves()
+    await rabbitmq.subscribe_channel()
 
 
 # Main #############################################################################################
