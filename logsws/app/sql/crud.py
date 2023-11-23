@@ -71,17 +71,14 @@ async def get_logs(db: AsyncSession, number_of_logs):
 
 async def create_log(db: AsyncSession, log):
     """Persist a new order into the database."""
-
     db_log = models.Log(
         exchange=log.exchange,
         routing_key=log.routing_key,
         data=log.data,
     )
-
     db.add(db_log)
     await db.commit()
     await db.refresh(db_log)
-
     return db_log
 
 

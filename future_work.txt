@@ -19,7 +19,7 @@ idealmente que el resto de microservicios no se caigan si client no está en con
 dar opcion de editar clientes, si se cambia algo que use delivery, notificar (añadir cola o lo que haga falta)
 
 log
-tener un exchange de logs donde se escriban cuando hay algun error en alguna parte
+hacer publish_log() cuando hay algun error en alguna parte
 
 order
 cambios de estado de sagas guardarlos en la db order con timestamp

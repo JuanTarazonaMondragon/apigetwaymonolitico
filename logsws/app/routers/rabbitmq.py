@@ -19,7 +19,7 @@ async def subscribe_channel():
     exchange_events_name = 'events'
     global exchange_events
     exchange_events = await channel.declare_exchange(name=exchange_events_name, type='topic', durable=True)
-    
+
     global exchange_commands_name
     exchange_commands_name = 'commands'
     global exchange_commands
@@ -29,6 +29,11 @@ async def subscribe_channel():
     exchange_responses_name = 'responses'
     global exchange_responses
     exchange_responses = await channel.declare_exchange(name=exchange_responses_name, type='topic', durable=True)
+    
+    global exchange_logs_name
+    exchange_logs_name = 'logs'
+    global exchange_logs
+    exchange_logs = await channel.declare_exchange(name=exchange_logs_name, type='topic', durable=True)
 
 
 async def on_event_log_message(message):
@@ -107,3 +112,29 @@ async def subscribe_responses_logs():
     async with queue.iterator() as queue_iter:
         async for message in queue_iter:
             await on_response_log_message(message)
+
+
+async def on_log_log_message(message):
+    async with message.process():
+        log = models.Log(
+            #exchange=message.exchange,
+            exchange=exchange_logs_name,
+            routing_key=message.routing_key,
+            data=message.body
+        )
+        db = SessionLocal()
+        await crud.create_log(db, log)
+        await db.close()
+
+
+async def subscribe_logs_logs():
+    # Create a queue
+    queue_name = "logs"
+    queue = await channel.declare_queue(name=queue_name, exclusive=True)
+    # Bind the queue to the exchange
+    routing_key = "#"
+    await queue.bind(exchange=exchange_logs, routing_key=routing_key)
+    # Set up a message consumer
+    async with queue.iterator() as queue_iter:
+        async for message in queue_iter:
+            await on_log_log_message(message)

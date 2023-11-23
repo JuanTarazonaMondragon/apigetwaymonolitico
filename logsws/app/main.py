@@ -53,6 +53,7 @@ async def startup_event():
     asyncio.create_task(rabbitmq.subscribe_events_logs())
     asyncio.create_task(rabbitmq.subscribe_commands_logs())
     asyncio.create_task(rabbitmq.subscribe_responses_logs())
+    asyncio.create_task(rabbitmq.subscribe_logs_logs())
 
 
 # Main #############################################################################################
