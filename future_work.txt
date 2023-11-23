@@ -1,32 +1,32 @@
 CAMBIAR NOMBRES DE MODELOS DE order_id a solo id, para que sea order.id y no order.order_id
-
-machine
-piezas gestionadas por machine o por order?
-si se cae machine se pierden las piezas que esta produciendo?
-si la order se cancela se sigue produciendo piezas? se malgastan?
-guardar piezas creadas desde la creacion de order hasta que se haya cancelado en un "almacen" para reutilizar en futuros orders instantaneamente
-añadir db a machine si este gestiona piezas
-añadir get de lista de piezas del almacen (machine/recovered o algo asi)
-
 order
 cola piece.created cambiar nombre a piece.needed
-
 payment
 cola order.payed cambiar nombre a payment.processed
 
-client
-si se levanta tarde, el resto de servicios fallara el get_public_key, esperar a que clients este healthy en sus endpoints, antes de activar endpoints crear keys. añadir routing key para client.new_key
-que client tras poner rest en marcha mande a un routing key evento de nueva public key, asi, los servicios que ya estan despiertos pediran mediante get (hay que hacer que los servicios no peten si se recibe error la primera vez que se pide mediante get y clients esta aun sin levantarse)
-
-all
-suscribirse a client.new_key, recibir key por aqui o por el api rest?
-en vez de meter argumentos en endpoints hacerlo en parametros, menos endpoints, con filtros, revisar cada endpoint para simplificar main_router
-
-postman
-meter username y password como basicauth, introduccion de token automatico para simplicidad
-
 ssl en rabbitmq y haproxy
-load balancing en replicas con haproxy, usando db clusters. queues rabbitmq para que no llegue mismo mensaje a replicas de machine? o si, si se quiere que se almacenen, aunque eso iria con db clusters, no?
+
+machine
+añadir get de lista de piezas del almacen (machine/recovered o algo asi)
 
 presentacion
 cambiar arquitectura general, los microservicios no publican en colas, sino en routing keys, las colas se bindean a los routing keys y los microservicios se suscriben a las colas
+
+client
+terminar lo de client.new_key de rabbit
+idealmente que el resto de microservicios no se caigan si client no está en condiciones de devolver key, y que mientras que no haya key healthcheck a haproxy no de bien
+    metiendo un try catch en la linea donde se hace get a client para el key. y en el healthcheck de cada main router incluir comprobacion de si hay key para devolver OK o ERROR
+dar opcion de editar clientes, si se cambia algo que use delivery, notificar (añadir cola o lo que haga falta)
+
+log
+tener un exchange de logs donde se escriban cuando hay algun error en alguna parte
+
+order
+cambios de estado de sagas guardarlos en la db order con timestamp
+
+all services
+en vez de meter argumentos en endpoints hacerlo en parametros, menos endpoints, con filtros, revisar cada endpoint para simplificar main_router
+healthchecks para que haproxy sepa si está levantado y devuelva X servicio esta caido
+
+consul
+cuando se hace get key a client, en vez de meter IP de client a pelo, hacer peticion a consul (IP de consul siempre se mantiene?)
