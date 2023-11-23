@@ -139,19 +139,23 @@ async def on_delivery_checked_message(message):
     async with message.process():
         delivery = json.loads(message.body)
         db = SessionLocal()
+        db_saga = SessionLocal()
         if delivery['status'] == True:
             db_order = await crud.change_order_status(db, delivery['id_order'], models.Order.STATUS_PAYMENT_PENDING)
+            await crud.create_sagas_history(db_saga, delivery['id_order'], models.Order.STATUS_PAYMENT_PENDING)
             data = {
                 "id_order": db_order.id_order,
                 "id_client": db_order.id_client,
-                "movement": db_order.number_of_pieces
+                "movement": -(db_order.number_of_pieces)
             }
             message_body = json.dumps(data)
             routing_key = "payment.check"
             await publish_command(message_body, routing_key)
         elif delivery['status'] == False:
             db_order = await crud.change_order_status(db, delivery['id_order'], models.Order.STATUS_CANCELED)
+            await crud.create_sagas_history(db_saga, delivery['id_order'], models.Order.STATUS_CANCELED)
         await db.close()
+        await db_saga.close()
 
 
 async def subscribe_delivery_checked():
@@ -171,8 +175,10 @@ async def on_payment_checked_message(message):
     async with message.process():
         payment = json.loads(message.body)
         db = SessionLocal()
+        db_saga = SessionLocal()
         if payment['status'] == True:
             db_order = await crud.change_order_status(db, payment['id_order'], models.Order.STATUS_QUEUED)
+            await crud.create_sagas_history(db_saga, payment['id_order'], models.Order.STATUS_QUEUED)
             for i in range (0, db_order.number_of_pieces):
                 piece = schemas.PieceBase(
                     status_piece=models.Piece.STATUS_QUEUED,
@@ -180,9 +186,9 @@ async def on_payment_checked_message(message):
                     # no se si hay que meter manufacturing date
                 )
                 await crud.create_piece(db, piece)
-            await db.close()
         elif payment['status'] == False:
             db_order = await crud.change_order_status(db, payment['id_order'], models.Order.STATUS_DELIVERY_CANCELING)
+            await crud.create_sagas_history(db_saga, payment['id_order'], models.Order.STATUS_DELIVERY_CANCELING)
             data = {
                 "id_order": db_order.id_order
             }
@@ -190,6 +196,7 @@ async def on_payment_checked_message(message):
             routing_key = "delivery.cancel"
             await publish_command(message_body, routing_key)
         await db.close()
+        await db_saga.close()
 
 
 async def subscribe_payment_checked():
@@ -205,25 +212,28 @@ async def subscribe_payment_checked():
             await on_payment_checked_message(message)
 
 
-async def on_delivery_cancelled_message(message):
+async def on_delivery_canceled_message(message):
     async with message.process():
         delivery = json.loads(message.body)
         db = SessionLocal()
+        db_saga = SessionLocal()
         db_order = await crud.change_order_status(db, delivery['id_order'], models.Order.STATUS_CANCELED)
+        await crud.create_sagas_history(db_saga, delivery['id_order'], models.Order.STATUS_CANCELED)
         await db.close()
+        await db_saga.close()
 
 
-async def subscribe_delivery_cancelled():
+async def subscribe_delivery_canceled():
     # Create a queue
-    queue_name = "delivery.cancelled"
+    queue_name = "delivery.canceled"
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
-    routing_key = "delivery.cancelled"
+    routing_key = "delivery.canceled"
     await queue.bind(exchange=exchange_responses_name, routing_key=routing_key)
     # Set up a message consumer
     async with queue.iterator() as queue_iter:
         async for message in queue_iter:
-            await on_delivery_cancelled_message(message)
+            await on_delivery_canceled_message(message)
 
 
 async def publish_command(message_body, routing_key):

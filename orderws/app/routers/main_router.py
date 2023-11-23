@@ -126,7 +126,6 @@ async def get_single_order(
         return order
     except Exception as exc:  # @ToDo: To broad exception
         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error obtaining order: {exc}")
-   
 
 
 @router.get(
@@ -164,3 +163,39 @@ async def get_single_client(
     if not orders:
         raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Client {client_id}'s orders not found")
     return orders
+
+
+@router.get(
+    "/order/sagashistory/{order_id}",
+    summary="Retrieve sagas history of a certain order",
+    responses={
+        status.HTTP_200_OK: {
+            "model": schemas.SagasHistoryBase,
+            "description": "Requested sagas history."
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": schemas.Message, "description": "Sagas history not found"
+        }
+    },
+    tags=['Order']
+)
+async def get_sagas_history(
+        order_id: int,
+        db: AsyncSession = Depends(get_db),
+        token: str = Header(..., description="JWT Token in the Header")
+):
+    """Retrieve sagas history"""
+    logger.debug("GET '/order/sagashistory/%i' endpoint called.", order_id)
+    payload = security.decode_token(token)
+    # validar fecha expiración del token
+    is_expirated = security.validar_fecha_expiracion(payload)
+    if(is_expirated):
+        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
+    else:
+        es_admin = security.validar_es_admin(payload)
+        if(es_admin==False):
+            raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
+    logs = await crud.get_sagas_history(db, order_id)
+    if not logs:
+        raise_and_log_error(logger, status.HTTP_404_NOT_FOUND)
+    return logs

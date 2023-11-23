@@ -43,9 +43,3 @@ class Log(BaseModel):
     exchange = Column(String(256), nullable=False)
     routing_key = Column(String(256), nullable=False)
     data = Column(String(256), nullable=False)
-
-    def as_dict(self):
-        """Return the log item as dict."""
-        dictionary = super().as_dict()
-        dictionary['log'] = [i.as_dict() for i in self.pieces]
-        return dictionary

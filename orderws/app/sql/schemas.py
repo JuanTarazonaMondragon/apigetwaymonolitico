@@ -28,7 +28,6 @@ class OrderBase(BaseModel):
         default=None,
         example=1
     )
-    #  pieces = relationship("Piece", lazy="joined")
 
 
 class Order(OrderBase):
@@ -79,3 +78,10 @@ class Piece(PieceBase):
     class Config:
         """ORM configuration."""
         orm_mode = True
+
+
+class SagasHistoryBase(BaseModel):
+    """Sagas history base schema definition."""
+    id: int = Field()
+    id_order: int = Field()
+    status: str = Field()

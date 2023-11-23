@@ -45,11 +45,3 @@ class Payment(BaseModel):
     id_client = Column(Integer, nullable=False)
     id_order = Column(Integer, nullable=True)
     movement = Column(Float, nullable=False)
-
-    # date = Column(DateTime(timezone=True), default=datetime.utcnow)
-
-    def as_dict(self):
-        """Return the payment item as dict."""
-        dictionary = super().as_dict()
-        dictionary['payment'] = [i.as_dict() for i in self.pieces]
-        return dictionary

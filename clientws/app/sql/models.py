@@ -47,9 +47,3 @@ class Client(BaseModel):
     address = Column(TEXT, nullable=False)
     postal_code = Column(Integer, nullable=False)
     role = Column(Integer, nullable=False, default=0) # 0 = CLIENT    1 = ADMIN
-
-    def as_dict(self):
-        """Return the client item as dict."""
-        dictionary = super().as_dict()
-        dictionary['client'] = [i.as_dict() for i in self.pieces]
-        return dictionary

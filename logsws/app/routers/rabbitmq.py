@@ -51,7 +51,7 @@ async def on_event_log_message(message):
 
 async def subscribe_events_logs():
     # Create a queue
-    queue_name = "logs"
+    queue_name = "events_logs"
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
     routing_key = "#"
@@ -77,7 +77,7 @@ async def on_command_log_message(message):
 
 async def subscribe_commands_logs():
     # Create a queue
-    queue_name = "logs"
+    queue_name = "commands_logs"
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
     routing_key = "#"
@@ -103,7 +103,7 @@ async def on_response_log_message(message):
 
 async def subscribe_responses_logs():
     # Create a queue
-    queue_name = "logs"
+    queue_name = "responses_logs"
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
     routing_key = "#"
@@ -129,7 +129,7 @@ async def on_log_log_message(message):
 
 async def subscribe_logs_logs():
     # Create a queue
-    queue_name = "logs"
+    queue_name = "logs_logs"
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
     routing_key = "#"

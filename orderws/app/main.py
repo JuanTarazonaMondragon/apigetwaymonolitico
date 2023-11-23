@@ -52,7 +52,7 @@ async def startup_event():
     await rabbitmq.subscribe_channel()
     asyncio.create_task(rabbitmq.subscribe_delivery_checked())
     asyncio.create_task(rabbitmq.subscribe_payment_checked())
-    asyncio.create_task(rabbitmq.subscribe_delivery_cancelled())
+    asyncio.create_task(rabbitmq.subscribe_delivery_canceled())
     asyncio.create_task(rabbitmq.subscribe_pieces())
     asyncio.create_task(rabbitmq.subscribe_delivering())
     asyncio.create_task(rabbitmq.subscribe_delivered())

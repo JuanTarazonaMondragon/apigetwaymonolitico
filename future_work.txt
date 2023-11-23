@@ -6,9 +6,6 @@ cola order.payed cambiar nombre a payment.processed
 
 ssl en rabbitmq y haproxy
 
-machine
-añadir get de lista de piezas del almacen (machine/recovered o algo asi)
-
 presentacion
 cambiar arquitectura general, los microservicios no publican en colas, sino en routing keys, las colas se bindean a los routing keys y los microservicios se suscriben a las colas
 
@@ -17,12 +14,10 @@ terminar lo de client.new_key de rabbit
 idealmente que el resto de microservicios no se caigan si client no está en condiciones de devolver key, y que mientras que no haya key healthcheck a haproxy no de bien
     metiendo un try catch en la linea donde se hace get a client para el key. y en el healthcheck de cada main router incluir comprobacion de si hay key para devolver OK o ERROR
 dar opcion de editar clientes, si se cambia algo que use delivery, notificar (añadir cola o lo que haga falta)
+dar opcion de deshabilitar/borrar clientes de db de clients y delivery
 
 log
 hacer publish_log() cuando hay algun error en alguna parte
-
-order
-cambios de estado de sagas guardarlos en la db order con timestamp
 
 all services
 en vez de meter argumentos en endpoints hacerlo en parametros, menos endpoints, con filtros, revisar cada endpoint para simplificar main_router
@@ -30,3 +25,7 @@ healthchecks para que haproxy sepa si está levantado y devuelva X servicio esta
 
 consul
 cuando se hace get key a client, en vez de meter IP de client a pelo, hacer peticion a consul (IP de consul siempre se mantiene?)
+
+PROXIMAS TAREAS ANDONI Y JULEN:
+    editar clientes y actualizar delivery
+    dar opcion de deshabilitar/borrar clientes de db de clients y delivery

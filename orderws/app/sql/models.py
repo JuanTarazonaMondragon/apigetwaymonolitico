@@ -55,11 +55,13 @@ class Order(BaseModel):
 
     pieces = relationship("Piece", back_populates="order", lazy="joined")
 
-    def as_dict(self):
-        """Return the order item as dict."""
-        dictionary = super().as_dict()
-        dictionary['pieces'] = [i.as_dict() for i in self.Pieces]
-        return dictionary
+
+class SagasHistory(BaseModel):
+    """Sagas history database table representation."""
+    __tablename__ = "sagas"
+    id = Column(Integer, primary_key=True)
+    id_order = Column(Integer, nullable=False)
+    status = Column(String(256), nullable=False)
 
 
 class Piece(BaseModel):
