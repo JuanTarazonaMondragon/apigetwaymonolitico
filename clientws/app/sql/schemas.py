@@ -60,6 +60,26 @@ class ClientPost(ClientBase):
         example="asdfasdf3423"
     )
 
+
+class ClientUpdatePost(BaseModel):
+    """Schema definition to update a client."""
+    email: str = Field(
+        description="The email of the client.",
+        default="example@gmail.com",
+        example="example@gmail.com"
+    )
+    address: str = Field(
+        description="The address of the client.",
+        default="puticlub manoli",
+        example="puticlub manoli"
+    )
+    postal_code: str = Field(
+        description="The postal code of the client.",
+        default="20000",
+        example="20000"
+    )
+
+
 class TokenRequest(BaseModel):
     """Client base schema definition."""
     username: str = Field(

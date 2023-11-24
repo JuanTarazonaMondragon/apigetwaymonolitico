@@ -74,6 +74,32 @@ async def subscribe_client_created():
             await on_client_created_message(message)
 
 
+async def on_client_updated_message(message):
+    async with message.process():
+        client = json.loads(message.body)
+        db = SessionLocal()
+        info_client = models.Client(
+            id_client=client['id_client'],
+            address=client['address'],
+            postal_code=client['postal_code']
+        )
+        db_client = await crud.update_client(db, info_client)
+        await db.close()
+
+
+async def subscribe_client_updated():
+    # Create a queue
+    queue_name = "client.updated"
+    queue = await channel.declare_queue(name=queue_name, exclusive=True)
+    # Bind the queue to the exchange
+    routing_key = "client.updated"
+    await queue.bind(exchange=exchange_events_name, routing_key=routing_key)
+    # Set up a message consumer
+    async with queue.iterator() as queue_iter:
+        async for message in queue_iter:
+            await on_client_updated_message(message)
+
+
 async def on_producing_message(message):
     async with message.process():
         delivery = json.loads(message.body)

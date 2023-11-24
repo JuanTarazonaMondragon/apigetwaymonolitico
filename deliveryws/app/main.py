@@ -51,6 +51,7 @@ async def startup_event():
     await security.get_public_key()
     await rabbitmq.subscribe_channel()
     asyncio.create_task(rabbitmq.subscribe_client_created())
+    asyncio.create_task(rabbitmq.subscribe_client_updated())
     asyncio.create_task(rabbitmq.subscribe_delivery_check())
     asyncio.create_task(rabbitmq.subscribe_delivery_cancel())
     asyncio.create_task(rabbitmq.subscribe_producing())

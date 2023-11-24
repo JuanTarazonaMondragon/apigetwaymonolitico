@@ -74,6 +74,7 @@ async def get_delivery_by_order(db: AsyncSession, order_id):
     delivery = await get_list_statement_result(db, stmt)
     return delivery[0]
 
+
 async def store_client(db: AsyncSession, client):
     """Persist a new client into the database."""
     db_client = models.Client(
@@ -86,6 +87,17 @@ async def store_client(db: AsyncSession, client):
     await db.refresh(db_client)
     return db_client
 
+
+async def update_client(db: AsyncSession, client):
+    """Update a client of the database."""
+    db_client = await get_client(db, client.id_client)
+    db_client.address = client.address
+    db_client.postal_code = client.postal_code
+    await db.commit()
+    await db.refresh(db_client)
+    return db_client
+
+
 async def check_address(db: AsyncSession, db_client):
     """Persist a new client into the database."""
     provincia = db_client.postal_code // 1000 # Extraer código de provincia del código postal
@@ -94,6 +106,7 @@ async def check_address(db: AsyncSession, db_client):
     else:
         address_check = False
     return address_check
+
 
 async def create_delivery(db: AsyncSession, db_delivery):
     """Persist a new order into the database."""

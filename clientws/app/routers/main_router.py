@@ -2,7 +2,7 @@
 """FastAPI router definitions."""
 import logging
 from typing import List
-from fastapi import APIRouter, Depends, status, Header
+from fastapi import APIRouter, Depends, status, Header, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from dependencies import get_db
 from routers import security
@@ -53,7 +53,6 @@ async def create_client(
             client_schema.role = 1
             db_client = await crud.create_client(db, client_schema)
             return db_client
-        
         # Decodificar el token
         payload = security.decode_token(token)
         # Validar fecha expiración del token
@@ -67,9 +66,41 @@ async def create_client(
                 return db_client 
             else:
                 raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
-
     except Exception as exc:  # @ToDo: To broad exception
         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error creating client: {exc}")
+
+
+@router.post(
+    "/client/update",
+    response_model=schemas.Client,
+    summary="Update single client",
+    status_code=status.HTTP_201_CREATED,
+    tags=["Client"]
+)
+async def update_client(
+        client_schema: schemas.ClientUpdatePost,
+        client_id: int = Query(..., description="Client ID"),
+        db: AsyncSession = Depends(get_db),
+        token: str = Header(..., description="JWT Token in the Header")
+):
+    """Update single client endpoint."""
+    logger.debug("POST '/client/update' endpoint called.")
+    try:
+        # Decodificar el token
+        payload = security.decode_token(token)
+        # Validar fecha expiración del token
+        is_expirated = security.validar_fecha_expiracion(payload)
+        if(is_expirated):
+            raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
+        else:
+            es_admin = security.validar_es_admin(payload)
+            client_id_token = payload["id_client"]
+            if(es_admin==False and client_id!=client_id_token):
+                raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
+            db_client = await crud.update_client(db, client_id, client_schema)
+            return db_client
+    except Exception as exc:  # @ToDo: To broad exception
+        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error updating client: {exc}")
 
 
 @router.get(
@@ -108,7 +139,6 @@ async def get_single_client(
 ):
     """Retrieve single client by id"""
     logger.debug("GET '/client/%i' endpoint called.", client_id)
-      
     payload = security.decode_token(token)
     # validar fecha expiración del token
     is_expirated = security.validar_fecha_expiracion(payload)
@@ -118,7 +148,6 @@ async def get_single_client(
         es_admin = security.validar_es_admin(payload)
         if(es_admin==False):
             raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
-        
     client = await crud.get_client(db, client_id)
     if not client:
         raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Client {client_id} not found")
@@ -140,7 +169,6 @@ async def get_token(
     try:
         username = request_data.username
         password = request_data.password
-
         # Realiza la autenticación aquí (sustituye esto con tu lógica real)
         client = await crud.get_client_by_username_and_pass(db, username, password)
         if not client:
@@ -148,7 +176,6 @@ async def get_token(
             raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Client {username} not found")
         else: 
             authenticated = True
-
         if authenticated:
             # Aquí puedes generar un token JWT si la autenticación es exitosa
             with open('private_key.pem', 'rb') as private_key_file:
