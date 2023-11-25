@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from routers import security
 from routers import main_router
 from sql import models, database
+from routers import rabbitmq
 
 # Configure logging ################################################################################
 logger = logging.getLogger(__name__)
@@ -50,6 +51,18 @@ async def startup_event():
         await conn.run_sync(models.Base.metadata.create_all)
     ## GENERAR CLAVES
     # security.generar_claves()
+    await rabbitmq.subscribe_channel()
+    data = {
+        "message": "Public key creado!!",
+    }
+    message_body = json.dumps(data)
+    routing_key = "client.key_created"
+    print("andoniiiiiiiiiiiiiii")
+    
+    try:
+        await rabbitmq.publish(message_body, routing_key)
+    except Exception as exc:
+        print('Exception  .............', exc)
 
 
 # Main #############################################################################################
