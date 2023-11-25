@@ -2,6 +2,7 @@
 """Main file to start FastAPI application."""
 import logging
 import os
+import json
 from fastapi import FastAPI
 from routers import main_router, rabbitmq, security
 from sql import models, database
@@ -50,6 +51,12 @@ async def startup_event():
     ## GENERAR CLAVES
     # security.generar_claves()
     await rabbitmq.subscribe_channel()
+    data = {
+        "message": "public key creado!!"
+    }
+    message_body = json.dumps(data)
+    routing_key = "client.key_created"
+    await rabbitmq.publish_key(message_body, routing_key)
 
 
 # Main #############################################################################################

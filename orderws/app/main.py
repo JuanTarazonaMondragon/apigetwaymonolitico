@@ -56,6 +56,8 @@ async def startup_event():
     asyncio.create_task(rabbitmq.subscribe_pieces())
     asyncio.create_task(rabbitmq.subscribe_delivering())
     asyncio.create_task(rabbitmq.subscribe_delivered())
+    asyncio.create_task(rabbitmq.subscribe_key_created())
+
 
 
 # Main #############################################################################################
