@@ -5,6 +5,7 @@ import os
 from fastapi import FastAPI
 from routers import main_router, rabbitmq, security
 from sql import models, database
+from consul.BLConsul import register_consul_service
 
 # Configure logging ################################################################################
 logger = logging.getLogger(__name__)
@@ -50,6 +51,8 @@ async def startup_event():
     ## GENERAR CLAVES
     # security.generar_claves()
     await rabbitmq.subscribe_channel()
+    register_consul_service()
+
 
 
 # Main #############################################################################################

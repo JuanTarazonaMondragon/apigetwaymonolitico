@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from routers import main_router, rabbitmq, security
 from sql import models, database
 import asyncio
+from consul.BLConsul import register_consul_service
 
 # Configure logging ################################################################################
 logger = logging.getLogger(__name__)
@@ -54,6 +55,7 @@ async def startup_event():
     asyncio.create_task(rabbitmq.subscribe_commands_logs())
     asyncio.create_task(rabbitmq.subscribe_responses_logs())
     asyncio.create_task(rabbitmq.subscribe_logs_logs())
+    register_consul_service()
 
 
 # Main #############################################################################################

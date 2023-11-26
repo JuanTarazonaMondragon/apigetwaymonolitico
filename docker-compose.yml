@@ -1,6 +1,19 @@
 version: '3'
 
 services:
+    #Consul
+  consul:
+    image: 'consul:latest'
+    ports:
+      - '8300:8300'
+      - '8301:8301'
+      - '8301:8301/udp'
+      - '8500:8500'
+      - '8600:8600'
+      - '8600:8600/udp'
+    networks:
+      service_discovery_network:
+        ipv4_address: '${CONSUL_HOST}'
   # Service Logs
   logs-r1:
     hostname: logs-r1
@@ -12,13 +25,15 @@ services:
     ports:
       - '18010:${UVICORN_PORT}'
     environment:
+      SERVICE_NAME: logs
+      SERVICE_ID: logs1
+      CONSUL_HOST: ${CONSUL_HOST}
       - 'UVICORN_PORT=${UVICORN_PORT}'
     depends_on:
       rabbitmq:
         condition: service_healthy
     networks:
       network:
-        ipv4_address: '${SERVICE_LOGS_R1_IP}'
     restart: unless-stopped
 
   # Service Client
@@ -32,6 +47,9 @@ services:
     ports:
       - '18011:${UVICORN_PORT}'
     environment:
+      SERVICE_NAME: client
+      SERVICE_ID: client1
+      CONSUL_HOST: ${CONSUL_HOST}
       - 'UVICORN_PORT=${UVICORN_PORT}'
     depends_on:
       rabbitmq:
@@ -69,6 +87,9 @@ services:
     ports:
       - '18012:${UVICORN_PORT}'
     environment:
+      SERVICE_NAME: delivery
+      SERVICE_ID: delivery1
+      CONSUL_HOST: ${CONSUL_HOST}
       - 'UVICORN_PORT=${UVICORN_PORT}'
     depends_on:
       rabbitmq:
@@ -106,6 +127,9 @@ services:
     ports:
       - '18013:${UVICORN_PORT}'
     environment:
+      SERVICE_NAME: machine
+      SERVICE_ID: machine1
+      CONSUL_HOST: ${CONSUL_HOST}
       - 'UVICORN_PORT=${UVICORN_PORT}'
     depends_on:
       rabbitmq:
@@ -143,6 +167,9 @@ services:
     ports:
       - '18014:${UVICORN_PORT}'
     environment:
+      SERVICE_NAME: order
+      SERVICE_ID: order1
+      CONSUL_HOST: ${CONSUL_HOST}
       - 'UVICORN_PORT=${UVICORN_PORT}'
     depends_on:
       rabbitmq:
@@ -180,6 +207,9 @@ services:
     ports:
       - '18015:${UVICORN_PORT}'
     environment:
+      SERVICE_NAME: payment
+      SERVICE_ID: payment1
+      CONSUL_HOST: ${CONSUL_HOST}
       - 'UVICORN_PORT=${UVICORN_PORT}'
     depends_on:
       rabbitmq:
