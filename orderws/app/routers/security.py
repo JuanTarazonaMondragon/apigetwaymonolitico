@@ -9,15 +9,41 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from routers.router_utils import raise_and_log_error
 import json
 import requests
+import time
 
 logger = logging.getLogger(__name__)
 
 public_key = ""
 
+class HealthManager:
+    def __init__(self):
+        self.status = False
+
+    def get_health_status(self):
+        return self.status
+
+    def set_health_status(self, status):
+        self.status = status
+
+health_manager = HealthManager()
+
+async def getHealthManagerStatus():
+    return health_manager.get_health_status()
+
 async def get_public_key():
     global public_key
-    response = requests.get("http://192.168.18.11:8001/client/get/key")
-    public_key = response.text.strip('"').replace("\\n", "\n")
+    while True:
+        try:
+            response = requests.get("http://192.168.18.11:8001/client/get/key")
+            if response.status_code == 200:
+                public_key = response.text.strip('"').replace("\\n", "\n")
+                health_manager.set_health_status(True)
+                return True
+            else:
+                health_manager.set_health_status(False)
+        except requests.RequestException as e:
+            health_manager.set_health_status(False)
+        time.sleep(1)
 
 def generar_claves():
     private_key = rsa.generate_private_key(
