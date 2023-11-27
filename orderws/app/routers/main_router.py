@@ -12,7 +12,6 @@ from routers.router_utils import raise_and_log_error
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-
 @router.get(
     "/",
     summary="Health check endpoint",
@@ -21,9 +20,10 @@ router = APIRouter()
 async def health_check():
     """Endpoint to check if everything started correctly."""
     logger.debug("GET '/' endpoint called.")
-    return {
-        "detail": "OK"
-    }
+    if await security.getHealthManagerStatus():
+        return {"detail": "OK"}
+    else:
+        return {"detail": "Service Unavailable"}
 
 
 @router.post(
