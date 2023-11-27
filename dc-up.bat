@@ -1,7 +1,5 @@
 docker-compose kill
 
-docker images | grep "<none>" | awk '{print $3}' | xargs docker rmi
-
 docker rmi -f macc-aas-client
 docker rmi -f macc-aas-delivery
 docker rmi -f macc-aas-machine

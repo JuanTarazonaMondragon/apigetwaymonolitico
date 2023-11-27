@@ -13,7 +13,7 @@ class Config:
     CONSUL_DNS_PORT = environ.get("CONSUL_DNS_PORT", 8600)
     PORT = int(environ.get("UVICORN_PORT", '8001'))
     SERVICE_NAME = environ.get("SERVICE_NAME", "logs")
-    SERVICE_ID = environ.get("SERVICE_ID", "logs-r1")
+    SERVICE_ID = environ.get("SERVICE_ID", "logs1")
     IP = None
 
     __instance = None

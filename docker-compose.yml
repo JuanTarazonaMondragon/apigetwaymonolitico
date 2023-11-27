@@ -16,9 +16,9 @@ services:
         ipv4_address: '${CONSUL_HOST}'
 
   # Service Logs
-  logs-r1:
-    hostname: logs-r1
-    container_name: macc-aas-logs-r1
+  logs1:
+    hostname: logs1
+    container_name: macc-aas-logs1
     image: macc-aas-logs
     volumes:
       - './logsws/app:/code/app'
@@ -26,7 +26,7 @@ services:
       - '18010:${UVICORN_PORT}'
     environment:
       SERVICE_NAME: logs
-      SERVICE_ID: logs-r1
+      SERVICE_ID: logs1
       CONSUL_HOST: ${CONSUL_HOST}
       UVICORN_PORT: ${UVICORN_PORT}
     depends_on:
@@ -37,9 +37,9 @@ services:
     restart: unless-stopped
 
   # Service Client
-  client-r1:
-    hostname: client-r1
-    container_name: macc-aas-client-r1
+  client1:
+    hostname: client1
+    container_name: macc-aas-client1
     image: macc-aas-client
     volumes:
       - './clientws/app:/code/app'
@@ -47,7 +47,7 @@ services:
       - '18011:${UVICORN_PORT}'
     environment:
       SERVICE_NAME: client
-      SERVICE_ID: client-r1
+      SERVICE_ID: client1
       CONSUL_HOST: ${CONSUL_HOST}
       UVICORN_PORT: ${UVICORN_PORT}
     depends_on:
@@ -58,9 +58,9 @@ services:
     restart: unless-stopped
 
   # Service Delivery
-  delivery-r1:
-    hostname: delivery-r1
-    container_name: macc-aas-delivery-r1
+  delivery1:
+    hostname: delivery1
+    container_name: macc-aas-delivery1
     image: macc-aas-delivery
     volumes:
       - './deliveryws/app:/code/app'
@@ -68,7 +68,7 @@ services:
       - '18012:${UVICORN_PORT}'
     environment:
       SERVICE_NAME: delivery
-      SERVICE_ID: delivery-r1
+      SERVICE_ID: delivery1
       CONSUL_HOST: ${CONSUL_HOST}
       UVICORN_PORT: ${UVICORN_PORT}
     depends_on:
@@ -79,9 +79,9 @@ services:
     restart: unless-stopped
 
   # Service Machine
-  machine-r1:
-    hostname: machine-r1
-    container_name: macc-aas-machine-r1
+  machine1:
+    hostname: machine1
+    container_name: macc-aas-machine1
     image: macc-aas-machine
     volumes:
       - './machinews/app:/code/app'
@@ -89,7 +89,7 @@ services:
       - '18013:${UVICORN_PORT}'
     environment:
       SERVICE_NAME: machine
-      SERVICE_ID: machine-r1
+      SERVICE_ID: machine1
       CONSUL_HOST: ${CONSUL_HOST}
       UVICORN_PORT: ${UVICORN_PORT}
     depends_on:
@@ -100,9 +100,9 @@ services:
     restart: unless-stopped
 
   # Service Order
-  order-r1:
-    hostname: order-r1
-    container_name: macc-aas-order-r1
+  order1:
+    hostname: order1
+    container_name: macc-aas-order1
     image: macc-aas-order
     volumes:
       - './orderws/app:/code/app'
@@ -110,7 +110,7 @@ services:
       - '18014:${UVICORN_PORT}'
     environment:
       SERVICE_NAME: order
-      SERVICE_ID: order-r1
+      SERVICE_ID: order1
       CONSUL_HOST: ${CONSUL_HOST}
       UVICORN_PORT: ${UVICORN_PORT}
     depends_on:
@@ -121,9 +121,9 @@ services:
     restart: unless-stopped
 
   # Service Payment
-  payment-r1:
-    hostname: payment-r1
-    container_name: macc-aas-payment-r1
+  payment1:
+    hostname: payment1
+    container_name: macc-aas-payment1
     image: macc-aas-payment
     volumes:
       - './paymentws/app:/code/app'
@@ -131,7 +131,7 @@ services:
       - '18015:${UVICORN_PORT}'
     environment:
       SERVICE_NAME: payment
-      SERVICE_ID: payment-r1
+      SERVICE_ID: payment1
       CONSUL_HOST: ${CONSUL_HOST}
       UVICORN_PORT: ${UVICORN_PORT}
     depends_on:
