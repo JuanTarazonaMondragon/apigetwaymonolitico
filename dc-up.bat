@@ -1,19 +1,21 @@
 docker-compose kill
 
-docker rmi -f macc-microservicios-client
-docker rmi -f macc-microservicios-delivery
-docker rmi -f macc-microservicios-machine
-docker rmi -f macc-microservicios-order
-docker rmi -f macc-microservicios-payment
-docker rmi -f macc-microservicios-rabbitmq
-docker rmi -f macc-microservicios-logs
+docker images | grep "<none>" | awk '{print $3}' | xargs docker rmi
 
-docker build -t macc-microservicios-logs ./logsws
-docker build -t macc-microservicios-client ./clientws
-docker build -t macc-microservicios-delivery ./deliveryws
-docker build -t macc-microservicios-machine ./machinews
-docker build -t macc-microservicios-order ./orderws
-docker build -t macc-microservicios-payment ./paymentws
-docker build -t macc-microservicios-rabbitmq ./rabbitmq
+docker rmi -f macc-aas-client
+docker rmi -f macc-aas-delivery
+docker rmi -f macc-aas-machine
+docker rmi -f macc-aas-order
+docker rmi -f macc-aas-payment
+docker rmi -f macc-aas-rabbitmq
+docker rmi -f macc-aas-logs
+
+docker build -t macc-aas-logs ./logsws
+docker build -t macc-aas-client ./clientws
+docker build -t macc-aas-delivery ./deliveryws
+docker build -t macc-aas-machine ./machinews
+docker build -t macc-aas-order ./orderws
+docker build -t macc-aas-payment ./paymentws
+docker build -t macc-aas-rabbitmq ./rabbitmq
 
 docker-compose up -d

@@ -19,13 +19,13 @@ class Message(BaseModel):
 
 
 @router.get(
-    "/",
+    "/machine/health",
     summary="Health check endpoint",
     response_model=Message,
 )
 async def health_check():
     """Endpoint to check if everything started correctly."""
-    logger.debug("GET '/' endpoint called.")
+    logger.debug("GET '/machine/health' endpoint called.")
     if await security.getHealthManagerStatus():
         return {"detail": "OK"}
     else:

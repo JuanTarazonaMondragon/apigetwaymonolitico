@@ -8,12 +8,12 @@ load_dotenv()
 
 class Config:
     """Set configuration vars from .env file."""
-    CONSUL_HOST = environ.get("CONSUL_HOST", "192.168.7.201")
+    CONSUL_HOST = environ.get("CONSUL_HOST", "192.168.18.201")
     CONSUL_PORT = environ.get("CONSUL_PORT", 8500)
     CONSUL_DNS_PORT = environ.get("CONSUL_DNS_PORT", 8600)
-    PORT = int(environ.get("PORT", '80'))
-    SERVICE_NAME = environ.get("SERVICE_NAME", "delivery")
-    SERVICE_ID = environ.get("SERVICE_ID", "delivery1")
+    PORT = int(environ.get("UVICORN_PORT", '8001'))
+    SERVICE_NAME = environ.get("SERVICE_NAME", "order")
+    SERVICE_ID = environ.get("SERVICE_ID", "order-r1")
     IP = None
 
     __instance = None

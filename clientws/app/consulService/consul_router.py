@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """FastAPI router definitions."""
 from fastapi import APIRouter, status, HTTPException
-from app.config import Config
+from consulService.config import Config
 import requests
 import logging
-from BLConsul import get_consul_service, get_consul_service_replicas, get_consul_key_value_item, get_consul_service_catalog
+from consulService.BLConsul import get_consul_service, get_consul_service_replicas, get_consul_key_value_item, get_consul_service_catalog
     
 
 logger = logging.getLogger(__name__)

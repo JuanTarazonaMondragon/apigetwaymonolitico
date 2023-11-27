@@ -5,7 +5,7 @@ import os
 from fastapi import FastAPI
 from routers import main_router, rabbitmq, security
 from sql import models, database
-from consul.BLConsul import register_consul_service
+from consulService.BLConsul import register_consul_service
 
 # Configure logging ################################################################################
 logger = logging.getLogger(__name__)

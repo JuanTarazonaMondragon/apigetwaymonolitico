@@ -1,7 +1,7 @@
 import consul
 import dns.resolver
 import logging
-from app.config import Config
+from consulService.config import Config
 
 logger = logging.getLogger(__name__)
 
