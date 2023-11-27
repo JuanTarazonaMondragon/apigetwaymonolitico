@@ -4,7 +4,7 @@ import logging
 import os
 import json
 from fastapi import FastAPI
-from routers import main_router, rabbitmq, security
+from routers import main_router, rabbitmq, security, rabbitmq_publish_logs
 from sql import models, database
 
 # Configure logging ################################################################################
@@ -52,6 +52,7 @@ async def startup_event():
         ## GENERAR CLAVES
         # security.generar_claves()
         await rabbitmq.subscribe_channel()
+        await rabbitmq_publish_logs.subscribe_channel()
         data = {
             "message": "public key creado!!"
         }
@@ -63,14 +64,14 @@ async def startup_event():
         }
         message_body2 = json.dumps(data)
         routing_key2 = "delivery.main_startup_event.info"
-        await rabbitmq.publish_log(message_body2, routing_key2)
+        await rabbitmq_publish_logs.publish_log(message_body2, routing_key2)
     except:
         data = {
             "message": "ERROR - Error al inicializar el servicio Client"
         }
         message_body = json.dumps(data)
         routing_key = "client.main_startup_event.error"
-        await rabbitmq.publish_log(message_body, routing_key)
+        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
 
 
 # Main #############################################################################################
