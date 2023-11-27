@@ -33,21 +33,6 @@ async def subscribe_channel():
     global exchange_responses
     exchange_responses = await channel.declare_exchange(name=exchange_responses_name, type='topic', durable=True)
 
-    global exchange_logs_name
-    exchange_logs_name = 'logs'
-    global exchange_logs
-    exchange_logs = await channel.declare_exchange(name=exchange_logs_name, type='topic', durable=True)
-
-
-async def publish_log(message_body, routing_key):
-    # Publish the message to the exchange
-    await exchange_logs.publish(
-        aio_pika.Message(
-            body=message_body.encode(),
-            content_type="text/plain"
-        ),
-        routing_key=routing_key)
-
 
 async def on_message_payment_check(message):
     async with message.process():

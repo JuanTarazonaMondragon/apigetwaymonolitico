@@ -4,7 +4,7 @@ import logging
 import os
 import json
 from fastapi import FastAPI
-from routers import main_router, rabbitmq, security
+from routers import main_router, rabbitmq, security, rabbitmq_publish_logs
 from sql import models, database
 import asyncio
 
@@ -52,6 +52,8 @@ async def startup_event():
             await conn.run_sync(models.Base.metadata.create_all)
         await security.get_public_key()
         await rabbitmq.subscribe_channel()
+        await rabbitmq_publish_logs.subscribe_channel()
+
         asyncio.create_task(rabbitmq.subscribe_client_created())
         asyncio.create_task(rabbitmq.subscribe_client_updated())
         asyncio.create_task(rabbitmq.subscribe_delivery_check())
@@ -64,14 +66,14 @@ async def startup_event():
         }
         message_body = json.dumps(data)
         routing_key = "delivery.main_startup_event.info"
-        await rabbitmq.publish_log(message_body, routing_key)
+        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
     except:
         data = {
             "message": "ERROR - Error al inicializar el servicio Delivery"
         }
         message_body = json.dumps(data)
         routing_key = "delivery.main_startup_event.error"
-        await rabbitmq.publish_log(message_body, routing_key)
+        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
 
 
 
