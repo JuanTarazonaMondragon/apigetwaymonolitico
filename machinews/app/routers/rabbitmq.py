@@ -2,6 +2,7 @@ import asyncio
 import aio_pika
 import json
 from routers.crud import set_status_of_machine
+from routers import security
 
 async def subscribe_channel():
     # Define your RabbitMQ server connection parameters directly as keyword arguments
@@ -25,6 +26,7 @@ async def subscribe_channel():
     exchange_logs_name = 'logs'
     global exchange_logs
     exchange_logs = await channel.declare_exchange(name=exchange_logs_name, type='topic', durable=True)
+
 
 
 async def publish_log(message_body, routing_key):
@@ -71,3 +73,19 @@ async def publish(message_body, routing_key):
             content_type="text/plain"
         ),
         routing_key=routing_key)
+
+async def subscribe_key_created():
+    # Create a queue
+    queue_name = "client.key_created"
+    queue = await channel.declare_queue(name=queue_name, exclusive=True)
+    # Bind the queue to the exchange
+    routing_key = "client.key_created"
+    await queue.bind(exchange=exchange_name, routing_key=routing_key)
+    # Set up a message consumer
+    async with queue.iterator() as queue_iter:
+        async for message in queue_iter:
+            await on_delivered_message_key_created(message)
+
+async def on_delivered_message_key_created(message):
+    async with message.process():
+        await security.get_public_key()

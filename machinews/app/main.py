@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Main file to start FastAPI application."""
 import logging
+import json
 import os
 from fastapi import FastAPI
 from routers import main_router, rabbitmq, security
@@ -43,11 +44,28 @@ app.include_router(main_router.router)
 
 @app.on_event("startup")
 async def startup_event():
-    """Configuration to be executed when FastAPI server starts."""
-    logger.info("Creating database tables")
-    await security.get_public_key()
-    await rabbitmq.subscribe_channel()
-    asyncio.create_task(rabbitmq.subscribe())
+    try:
+        """Configuration to be executed when FastAPI server starts."""
+        logger.info("Creating database tables")
+        await security.get_public_key()
+        await rabbitmq.subscribe_channel()
+        asyncio.create_task(rabbitmq.subscribe())
+        asyncio.create_task(rabbitmq.subscribe_key_created())
+        data = {
+            "message": "INFO - Servicio Machine inicializado correctamente"
+        }
+        message_body = json.dumps(data)
+        routing_key = "machine.main_startup_event.info"
+        await rabbitmq.publish_log(message_body, routing_key)
+    except:
+        data = {
+            "message": "ERROR - Error al inicializar el servicio Machine"
+        }
+        message_body = json.dumps(data)
+        routing_key = "machine.main_startup_event.error"
+        await rabbitmq.publish_log(message_body, routing_key)
+
+
 
 
 # Main #############################################################################################

@@ -45,18 +45,32 @@ app.include_router(main_router.router)
 @app.on_event("startup")
 async def startup_event():
     """Configuration to be executed when FastAPI server starts."""
-    logger.info("Creating database tables")
-    async with database.engine.begin() as conn:
-        await conn.run_sync(models.Base.metadata.create_all)
-    ## GENERAR CLAVES
-    # security.generar_claves()
-    await rabbitmq.subscribe_channel()
-    data = {
-        "message": "public key creado!!"
-    }
-    message_body = json.dumps(data)
-    routing_key = "client.key_created"
-    await rabbitmq.publish_key(message_body, routing_key)
+    try:
+        logger.info("Creating database tables")
+        async with database.engine.begin() as conn:
+            await conn.run_sync(models.Base.metadata.create_all)
+        ## GENERAR CLAVES
+        # security.generar_claves()
+        await rabbitmq.subscribe_channel()
+        data = {
+            "message": "public key creado!!"
+        }
+        message_body = json.dumps(data)
+        routing_key = "client.key_created"
+        await rabbitmq.publish_key(message_body, routing_key)
+        data2 = {
+            "message": "INFO - Servicio Delivery inicializado correctamente"
+        }
+        message_body2 = json.dumps(data)
+        routing_key2 = "delivery.main_startup_event.info"
+        await rabbitmq.publish_log(message_body2, routing_key2)
+    except:
+        data = {
+            "message": "ERROR - Error al inicializar el servicio Client"
+        }
+        message_body = json.dumps(data)
+        routing_key = "client.main_startup_event.error"
+        await rabbitmq.publish_log(message_body, routing_key)
 
 
 # Main #############################################################################################

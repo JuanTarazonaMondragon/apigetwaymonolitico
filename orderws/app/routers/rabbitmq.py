@@ -92,10 +92,6 @@ async def on_delivered_message(message):
 
 async def on_delivered_message_key_created(message):
     async with message.process():
-        delivery = json.loads(message.body)
-        # db = SessionLocal()
-        # db_order = await crud.change_order_status(db, delivery['id_order'], models.Order.STATUS_DELIVERED)
-        # await db.close()
         await security.get_public_key()
 
 
