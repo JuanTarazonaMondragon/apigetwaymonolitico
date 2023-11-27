@@ -8,6 +8,7 @@ from dependencies import get_db
 from routers import security
 from sql import crud, schemas
 from routers.router_utils import raise_and_log_error
+from routers import rabbitmq_publish_logs
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -67,6 +68,12 @@ async def create_client(
             else:
                 raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
     except Exception as exc:  # @ToDo: To broad exception
+        data = {
+            "message": "ERROR - Error al inicializar el servicio Client"
+        }
+        message_body = json.dumps(data)
+        routing_key = "client.main_startup_event.error"
+        await rabbitmq.publish_log(message_body, routing_key)
         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error creating client: {exc}")
 
 
