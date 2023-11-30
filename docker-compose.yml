@@ -4,6 +4,7 @@ services:
   # Consul
   consul:
     image: 'consul:1.15.4'
+    container_name: macc-aas-consul
     ports:
       - '8300:8300'
       - '8301:8301'
@@ -12,7 +13,7 @@ services:
       - '8600:8600'
       - '8600:8600/udp'
     networks:
-      network:
+      bridge-network:
         ipv4_address: '${CONSUL_HOST}'
 
   # Service Logs
@@ -33,7 +34,7 @@ services:
       rabbitmq:
         condition: service_healthy
     networks:
-      network:
+      bridge-network:
     restart: unless-stopped
 
   # Service Client
@@ -54,7 +55,7 @@ services:
       rabbitmq:
         condition: service_healthy
     networks:
-      network:
+      bridge-network:
     restart: unless-stopped
 
   # Service Delivery
@@ -75,7 +76,7 @@ services:
       rabbitmq:
         condition: service_healthy
     networks:
-      network:
+      bridge-network:
     restart: unless-stopped
 
   # Service Machine
@@ -96,7 +97,7 @@ services:
       rabbitmq:
         condition: service_healthy
     networks:
-      network:
+      bridge-network:
     restart: unless-stopped
 
   # Service Order
@@ -117,7 +118,7 @@ services:
       rabbitmq:
         condition: service_healthy
     networks:
-      network:
+      bridge-network:
     restart: unless-stopped
 
   # Service Payment
@@ -138,7 +139,7 @@ services:
       rabbitmq:
         condition: service_healthy
     networks:
-      network:
+      bridge-network:
     restart: unless-stopped
 
   haproxy:
@@ -147,16 +148,14 @@ services:
     container_name: macc-aas-haproxy
     ports:
       - '${HAPROXY_PORT}:${HAPROXY_PORT}'
-      - '${HAPROXY_STATS_PORT}:${HAPROXY_STATS_PORT}'
-    expose:
-      - '${HAPROXY_PORT}'
-      - '${HAPROXY_STATS_PORT}' # Port For HAProxy Web UI = 18001
+      - '${HAPROXY_STATS_PORT}:${HAPROXY_STATS_PORT}' # Port For HAProxy Web UI = 18001
     networks:
-      network:
+      bridge-network:
         ipv4_address: '${HAPROXY_IP}'
     environment:
       - 'HAPROXY_PORT=${HAPROXY_PORT}'
       - 'HAPROXY_STATS_PORT=${HAPROXY_STATS_PORT}'
+      - 'CONSUL_HOST=${CONSUL_HOST}'
     restart: unless-stopped
     volumes:
       - './apigateway/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg'
@@ -176,11 +175,11 @@ services:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: user
     networks:
-      network:
+      bridge-network:
         ipv4_address: '${RABBITMQ_IP}'
 
 networks:
-  network:
+  bridge-network:
     driver: bridge
     ipam:
       driver: default

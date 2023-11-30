@@ -9,8 +9,6 @@ cambiar arquitectura general, los microservicios no publican en colas, sino en r
 
 client
 terminar lo de client.new_key de rabbit
-idealmente que el resto de microservicios no se caigan si client no está en condiciones de devolver key, y que mientras que no haya key healthcheck a haproxy no de bien
-    metiendo un try catch en la linea donde se hace get a client para el key. y en el healthcheck de cada main router incluir comprobacion de si hay key para devolver OK o ERROR
 dar opcion de deshabilitar clientes en db de clients. NO DEVOLVER TOKEN si no está habilitado
 
 log
@@ -27,3 +25,4 @@ ssl en rabbitmq y haproxy
 
 JULEN PROX TAREA
     deshabilitar clientes
+    quitar la basura de lo de RETURN OK OR SERVICE UNAVAILABLE EN healthcheck
