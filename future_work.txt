@@ -17,12 +17,9 @@ hacer publish_log() cuando hay algun error en alguna parte
 all services
 en vez de meter argumentos en endpoints hacerlo en parametros, menos endpoints, con filtros, revisar cada endpoint para simplificar main_router
 healthchecks para que haproxy sepa si está levantado y devuelva X servicio esta caido
+    quitar la basura de lo de RETURN OK OR SERVICE UNAVAILABLE EN healthcheck
 
 consul
 cuando se hace get key a client, en vez de meter IP de client a pelo, hacer peticion a consul (IP de consul siempre se mantiene?)
 
 ssl en rabbitmq y haproxy
-
-JULEN PROX TAREA
-    deshabilitar clientes
-    quitar la basura de lo de RETURN OK OR SERVICE UNAVAILABLE EN healthcheck

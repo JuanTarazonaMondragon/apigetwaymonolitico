@@ -3,7 +3,7 @@ version: '3'
 services:
   # Consul
   consul:
-    image: 'consul:1.15.4'
+    image: consul:1.15.4
     container_name: macc-aas-consul
     ports:
       - '8300:8300'
