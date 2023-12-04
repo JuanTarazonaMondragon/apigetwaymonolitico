@@ -11,18 +11,13 @@ presentacion
 cambiar arquitectura general, los microservicios no publican en colas, sino en routing keys, las colas se bindean a los routing keys y los microservicios se suscriben a las colas
 
 client
-terminar lo de client.new_key de rabbit
 dar opcion de deshabilitar clientes en db de clients. NO DEVOLVER TOKEN si no está habilitado
-
-log
-hacer publish_log() cuando hay algun error en alguna parte
 
 all services
 en vez de meter argumentos en endpoints hacerlo en parametros, menos endpoints, con filtros, revisar cada endpoint para simplificar main_router
-healthchecks para que haproxy sepa si está levantado y devuelva X servicio esta caido
-    quitar la basura de lo de RETURN OK OR SERVICE UNAVAILABLE EN healthcheck
-
-consul
-cuando se hace get key a client, en vez de meter IP de client a pelo, hacer peticion a consul (IP de consul siempre se mantiene?)
 
 ssl en rabbitmq y haproxy
+
+
+
+JULEN: los nombres de los servicios estan con 1 al final, si quito eso no se ponen en marcha, así que los dejaré así

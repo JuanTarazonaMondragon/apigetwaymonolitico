@@ -48,11 +48,11 @@ async def startup_event():
     try:
         """Configuration to be executed when FastAPI server starts."""
         logger.info("Creating database tables")
-        await security.get_public_key()
         await rabbitmq.subscribe_channel()
         await rabbitmq_publish_logs.subscribe_channel()
         register_consul_service()
         asyncio.create_task(rabbitmq.subscribe_key_created())
+        await security.get_public_key()
         asyncio.create_task(rabbitmq.subscribe())
         data = {
             "message": "INFO - Servicio Machine inicializado correctamente"

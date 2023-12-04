@@ -29,9 +29,7 @@ router = APIRouter()
 async def health_check():
     """Endpoint to check if everything started correctly."""
     logger.debug("GET '/client/health' endpoint called.")
-    return {
-        "detail": "OK"
-    }
+    return {"detail": "Service Healthy."}
 
 
 @router.post(

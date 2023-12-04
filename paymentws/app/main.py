@@ -51,12 +51,11 @@ async def startup_event():
         logger.info("Creating database tables")
         async with database.engine.begin() as conn:
             await conn.run_sync(models.Base.metadata.create_all)
-        
-        await security.get_public_key()
         await rabbitmq.subscribe_channel()
         await rabbitmq_publish_logs.subscribe_channel()
         register_consul_service()
         asyncio.create_task(rabbitmq.subscribe_key_created())
+        await security.get_public_key()
         asyncio.create_task(rabbitmq.subscribe_payment_check())
         data2 = {
             "message": "INFO - Servicio Payment inicializado correctamente"

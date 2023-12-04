@@ -1,4 +1,6 @@
 FROM python:3.10-slim
+RUN apt-get update -y && \
+    apt-get install -y curl
 ADD ./requirements.txt /code/requirements.txt
 COPY app /code/app
 WORKDIR /code/app

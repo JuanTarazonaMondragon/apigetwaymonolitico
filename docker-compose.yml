@@ -40,6 +40,8 @@ services:
         condition: service_healthy
       consul:
         condition: service_healthy
+      client1:
+        condition: service_healthy
     networks:
       bridge-network:
     restart: unless-stopped
@@ -63,6 +65,11 @@ services:
         condition: service_healthy
       consul:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/client/health"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
     networks:
       bridge-network:
     restart: unless-stopped
@@ -85,6 +92,8 @@ services:
       rabbitmq:
         condition: service_healthy
       consul:
+        condition: service_healthy
+      client1:
         condition: service_healthy
     networks:
       bridge-network:
@@ -109,6 +118,8 @@ services:
         condition: service_healthy
       consul:
         condition: service_healthy
+      client1:
+        condition: service_healthy
     networks:
       bridge-network:
     restart: unless-stopped
@@ -132,6 +143,8 @@ services:
         condition: service_healthy
       consul:
         condition: service_healthy
+      client1:
+        condition: service_healthy
     networks:
       bridge-network:
     restart: unless-stopped
@@ -154,6 +167,8 @@ services:
       rabbitmq:
         condition: service_healthy
       consul:
+        condition: service_healthy
+      client1:
         condition: service_healthy
     networks:
       bridge-network:

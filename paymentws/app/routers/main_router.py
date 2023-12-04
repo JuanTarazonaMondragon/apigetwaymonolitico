@@ -8,7 +8,7 @@ from dependencies import get_db
 from sql import crud, schemas
 from routers import security, rabbitmq_publish_logs
 from routers.router_utils import raise_and_log_error
-import json
+
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -23,9 +23,9 @@ async def health_check():
     """Endpoint to check if everything started correctly."""
     logger.debug("GET '/payment/health' endpoint called.")
     if await security.getHealthManagerStatus():
-        return {"detail": "OK"}
+        return {"detail": "Service Healthy."}
     else:
-        return {"detail": "Service Unavailable"}
+        raise_and_log_error(logger, status.HTTP_503_SERVICE_UNAVAILABLE, "Service Unavailable.")
 
 
 @router.post(

@@ -22,9 +22,9 @@ async def health_check():
     """Endpoint to check if everything started correctly."""
     logger.debug("GET '/logs/health' endpoint called.")
     if await security.getHealthManagerStatus():
-        return {"detail": "OK"}
+        return {"detail": "Service Healthy."}
     else:
-        return {"detail": "Service Unavailable"}
+        raise_and_log_error(logger, status.HTTP_503_SERVICE_UNAVAILABLE, "Service Unavailable.")
 
 
 @router.get(
