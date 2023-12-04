@@ -43,7 +43,7 @@ app.include_router(main_router.router)
 
 
 @app.on_event("startup")
-async def startup_event():
+async def startup_event(): 
     """Configuration to be executed when FastAPI server starts."""
     try:
         logger.info("Creating database tables")
@@ -62,7 +62,7 @@ async def startup_event():
         data2 = {
             "message": "INFO - Servicio Delivery inicializado correctamente"
         }
-        message_body2 = json.dumps(data)
+        message_body2 = json.dumps(data2)
         routing_key2 = "delivery.main_startup_event.info"
         await rabbitmq_publish_logs.publish_log(message_body2, routing_key2)
     except:

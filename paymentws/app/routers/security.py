@@ -17,7 +17,8 @@ public_key = ""
 async def get_public_key():
     global public_key
     response = requests.get("http://192.168.18.11:8001/client/get/key")
-    public_key = response.text.strip('"').replace("\\n", "\n")
+    public_key = response.text.strip('"').replace("\\n", "\n").replace("\\r", "\r")
+    print('payment - security - public_key ----- get_public_key: ', public_key)
 
 def generar_claves():
     private_key = rsa.generate_private_key(
@@ -51,7 +52,9 @@ def generar_claves():
 
 def decode_token(token:str):
     try:
+        print('payment - security - decode_token - public_key: ', public_key)
         payload = json.loads(json.dumps(jwt.decode(token, public_key, ['RS256'])))
+        print('payment - security - decode_token - payload ------------->', payload)
         return payload
     except Exception as exc:  # @ToDo: To broad exception
         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error decoding the token: {exc}")

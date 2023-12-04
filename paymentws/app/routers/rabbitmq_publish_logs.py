@@ -15,7 +15,7 @@ async def subscribe_channel():
     global channel
     channel = await connection.channel()
 
-    global exchange_logs_name
+    global exchange_logs_name 
     exchange_logs_name = 'logs'
     global exchange_logs
     exchange_logs = await channel.declare_exchange(name=exchange_logs_name, type='topic', durable=True)
@@ -29,3 +29,8 @@ async def publish_log(message_body, routing_key):
             content_type="text/plain"
         ),
         routing_key=routing_key)
+
+async def send_message_log(message, routing_key):
+        data = {"message": message}
+        message_body = json.dumps(data)
+        publish_log(message_body, routing_key)

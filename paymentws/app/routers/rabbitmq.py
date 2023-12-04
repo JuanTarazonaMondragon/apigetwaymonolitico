@@ -97,8 +97,18 @@ async def subscribe_key_created():
     # Set up a message consumer
     async with queue.iterator() as queue_iter:
         async for message in queue_iter:
+            print('subscribe_key_created message ---', message)
             await on_delivered_message_key_created(message)
 
 async def on_delivered_message_key_created(message):
     async with message.process():
         await security.get_public_key()
+
+async def publish_key(message_body, routing_key):
+    # Publish the message to the exchange
+    await exchange_events.publish(
+        aio_pika.Message(
+            body=message_body.encode(),
+            content_type="text/plain"
+        ),
+        routing_key=routing_key)
