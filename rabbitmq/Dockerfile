@@ -1,3 +1,3 @@
-FROM rabbitmq:3-management
-RUN apt-get update -y && \
-    apt-get install -y curl
+FROM rabbitmq:3.9.29-management-alpine
+RUN apk update && \
+    apk add --no-cache curl

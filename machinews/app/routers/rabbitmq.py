@@ -8,7 +8,7 @@ async def subscribe_channel():
     # Define your RabbitMQ server connection parameters directly as keyword arguments
     connection = await aio_pika.connect_robust(
         host='rabbitmq',
-        port=5672,
+        port=5671,
         virtualhost='/',
         login='user',
         password='user',

@@ -190,33 +190,36 @@ services:
       - 'CONSUL_HOST=${CONSUL_HOST}'
     restart: unless-stopped
     volumes:
-      - './apigateway/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg'
+      - ./apigateway/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
 
   rabbitmq:
+    hostname: rabbitmq
     image: macc-aas-rabbitmq
     container_name: macc-aas-rabbitmq
     ports:
-      - "15671:15671"  # Port For RabbitMQ Web UI
-      - "5671:5671"    # Port For RabbitMQ Service
+      - "${RABBITMQ_PORT_WEB_UI_SSL}:${RABBITMQ_PORT_WEB_UI_SSL}"
+      - "${RABBITMQ_PORT_SERVICE_SSL}:${RABBITMQ_PORT_SERVICE_SSL}"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:15671/"]
+      test: ["CMD", "curl", "-f", "http://localhost:${RABBITMQ_PORT_WEB_UI_NO_SSL}/"]
       interval: 2s
       timeout: 2s
       retries: 10
     volumes:
-      #- './rabbitmq/certs/cert.pem:/etc/ssl/certs/cert.pem'
-      - './rabbitmq/certs/rabbitmq_cert.pem:/etc/ssl/certs/rabbitmq_cert.pem'
-      - './rabbitmq/certs/rabbitmq_key.pem:/etc/ssl/certs/rabbitmq_key.pem'
-      - './rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf'
+      #- ./rabbitmq/certs/cert.pem:/etc/ssl/certs/cert.pem:ro
+      - ./rabbitmq/certs/rabbitmq_cert.pem:/etc/ssl/certs/rabbitmq_cert.pem:ro
+      - ./rabbitmq/certs/rabbitmq_key.pem:/etc/ssl/certs/rabbitmq_key.pem:ro
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
     environment:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
       RABBITMQ_DEFAULT_VHOST: "/"
-      #RABBITMQ_SSL_CACERTFILE: /etc/ssl/certs/cert.pem
-      #RABBITMQ_SSL_CERTFILE: /etc/ssl/certs/rabbitmq_cert.pem
-      #RABBITMQ_SSL_KEYFILE: /etc/ssl/certs/rabbitmq_key.pem
-      #RABBITMQ_SSL_VERIFY: verify_none
-      #RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: false
+      #RABBITMQ_SSL_CACERTFILE: /etc/ssl/certs/cert.pem:ro
+      #RABBITMQ_SSL_CERTFILE: /etc/ssl/certs/rabbitmq_cert.pem:ro
+      #RABBITMQ_SSL_KEYFILE: /etc/ssl/certs/rabbitmq_key.pem:ro
+      #RABBITMQ_SSL_VERIFY: verify_peer
+      #RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: true
+    extra_hosts:
+      - "rabbitmq:${RABBITMQ_IP}"
     networks:
       bridge-network:
         ipv4_address: '${RABBITMQ_IP}'
