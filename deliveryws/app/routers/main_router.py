@@ -10,6 +10,8 @@ from sql import crud, schemas, models
 from routers.router_utils import raise_and_log_error
 from routers import security
 from routers.rabbitmq import send_product
+from routers import rabbitmq_publish_logs
+import json
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -54,10 +56,29 @@ async def get_single_delivery(
     # validar fecha expiración del token
     is_expirated = security.validar_fecha_expiracion(payload)
     if(is_expirated):
+        data = {
+            "message": "ERROR - Token expired, log in again"
+        }
+        message_body = json.dumps(data)
+        routing_key = "delivery.main_router_get_single_delivery.error"
+        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
     delivery = await crud.get_delivery_by_order(db, order_id)
+    
     if not delivery:
+        data = {
+            "message": "ERROR - Delivery not found"
+        }
+        message_body = json.dumps(data)
+        routing_key = "delivery.main_router_get_single_delivery.error"
+        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
         raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Delivery {order_id} not found")
+    data = {
+        "message": "INFO - Delivery obtained"
+    }
+    message_body = json.dumps(data)
+    routing_key = "delivery.main_router_get_single_delivery.info"
+    await rabbitmq_publish_logs.publish_log(message_body, routing_key)
     return delivery
 
 
@@ -85,12 +106,36 @@ async def get_list_delivery(
     # validar fecha expiración del token
     is_expirated = security.validar_fecha_expiracion(payload)
     if(is_expirated):
+        data = {
+            "message": "ERROR - Token expirated, log in again"
+        }
+        message_body = json.dumps(data)
+        routing_key = "delivery.main_router_get_list_delivery.error"
+        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
     else:
         es_admin = security.validar_es_admin(payload)
         if(es_admin==False):
+            data = {
+                "message": "ERROR - You don't have permissions"
+            }
+            message_body = json.dumps(data)
+            routing_key = "delivery.main_router_get_list_delivery.error"
+            await rabbitmq_publish_logs.publish_log(message_body, routing_key)
             raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
     delivery_list = await crud.get_delivery_list(db)
     if not delivery_list:
+        data = {
+            "message": "ERROR - Delivery not found"
+        }
+        message_body = json.dumps(data)
+        routing_key = "delivery.main_router_get_list_delivery.error"
+        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
         raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Delivery not found")
+    data = {
+        "message": "INFO - Delivery list obtained"
+    }
+    message_body = json.dumps(data)
+    routing_key = "delivery.main_router_get_list_delivery.info"
+    await rabbitmq_publish_logs.publish_log(message_body, routing_key)
     return delivery_list
