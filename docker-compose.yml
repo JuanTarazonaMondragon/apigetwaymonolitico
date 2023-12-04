@@ -3,7 +3,7 @@ version: '3'
 services:
   # Consul
   consul:
-    image: consul:1.15.4
+    image: macc-aas-consul
     container_name: macc-aas-consul
     ports:
       - '8300:8300'
@@ -12,6 +12,11 @@ services:
       - '8500:8500'     # Port For Consul Web UI
       - '8600:8600'
       - '8600:8600/udp'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8500/"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
     networks:
       bridge-network:
         ipv4_address: '${CONSUL_HOST}'
@@ -32,6 +37,8 @@ services:
       UVICORN_PORT: ${UVICORN_PORT}
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      consul:
         condition: service_healthy
     networks:
       bridge-network:
@@ -54,6 +61,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      consul:
+        condition: service_healthy
     networks:
       bridge-network:
     restart: unless-stopped
@@ -74,6 +83,8 @@ services:
       UVICORN_PORT: ${UVICORN_PORT}
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      consul:
         condition: service_healthy
     networks:
       bridge-network:
@@ -96,6 +107,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      consul:
+        condition: service_healthy
     networks:
       bridge-network:
     restart: unless-stopped
@@ -117,6 +130,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      consul:
+        condition: service_healthy
     networks:
       bridge-network:
     restart: unless-stopped
@@ -137,6 +152,8 @@ services:
       UVICORN_PORT: ${UVICORN_PORT}
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      consul:
         condition: service_healthy
     networks:
       bridge-network:

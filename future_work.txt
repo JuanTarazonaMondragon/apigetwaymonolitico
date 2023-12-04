@@ -4,6 +4,9 @@ cola piece.created cambiar nombre a piece.needed
 payment
 cola order.payed cambiar nombre a payment.processed
 
+alain dijo que convenia combinar mensajes rabbit de order created a delivery y a machine
+    para que order no tenga que saber quien escucha, dar toda la info necesaria para que cada uno coja lo que necesite
+
 presentacion
 cambiar arquitectura general, los microservicios no publican en colas, sino en routing keys, las colas se bindean a los routing keys y los microservicios se suscriben a las colas
 
