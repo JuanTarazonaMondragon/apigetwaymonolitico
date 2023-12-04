@@ -54,8 +54,7 @@ async def startup_event():
         await security.get_public_key()
         await rabbitmq.subscribe_channel()
         await rabbitmq_publish_logs.subscribe_channel()
-    register_consul_service()
-
+        register_consul_service()
         asyncio.create_task(rabbitmq.subscribe_delivery_checked())
         asyncio.create_task(rabbitmq.subscribe_payment_checked())
         asyncio.create_task(rabbitmq.subscribe_delivery_canceled())
@@ -77,8 +76,6 @@ async def startup_event():
         message_body = json.dumps(data)
         routing_key = "order.main_startup_event.error"
         await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-
-
 
 
 # Main #############################################################################################

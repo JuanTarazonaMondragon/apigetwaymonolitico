@@ -54,8 +54,7 @@ async def startup_event():
         await security.get_public_key()
         await rabbitmq.subscribe_channel()
         await rabbitmq_publish_logs.subscribe_channel()
-    register_consul_service()
-
+        register_consul_service()
         asyncio.create_task(rabbitmq.subscribe_client_created())
         asyncio.create_task(rabbitmq.subscribe_client_updated())
         asyncio.create_task(rabbitmq.subscribe_delivery_check())

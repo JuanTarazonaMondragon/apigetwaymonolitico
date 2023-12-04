@@ -53,6 +53,7 @@ async def startup_event():
         await rabbitmq_publish_logs.subscribe_channel()
         asyncio.create_task(rabbitmq.subscribe())
         asyncio.create_task(rabbitmq.subscribe_key_created())
+        register_consul_service()
         data = {
             "message": "INFO - Servicio Machine inicializado correctamente"
         }
@@ -66,9 +67,6 @@ async def startup_event():
         message_body = json.dumps(data)
         routing_key = "machine.main_startup_event.error"
         await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-    register_consul_service()
-
-
 
 
 # Main #############################################################################################

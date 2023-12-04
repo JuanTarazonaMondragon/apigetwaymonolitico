@@ -55,14 +55,9 @@ async def startup_event():
         await security.get_public_key()
         await rabbitmq.subscribe_channel()
         await rabbitmq_publish_logs.subscribe_channel()
-       
-        await rabbitmq.subscribe_key_created()
-    register_consul_service()
-
+        register_consul_service()
         asyncio.create_task(rabbitmq.subscribe_payment_check())
-        #asyncio.create_task(rabbitmq.subscribe_key_created())
-
-
+        asyncio.create_task(rabbitmq.subscribe_key_created())
         data2 = {
             "message": "INFO - Servicio Payment inicializado correctamente"
         }
@@ -77,8 +72,6 @@ async def startup_event():
         message_body = json.dumps(data)
         routing_key = "payment.main_startup_event.error"
         await rabbitmq_publish_logs.publish_log(message_body, routing_key) 
-
-
 
 
 # Main #############################################################################################
