@@ -53,27 +53,51 @@ async def create_client(
         if (client_schema.username == "joxemai" and client_schema.password == "joxemai"):
             client_schema.role = 1
             db_client = await crud.create_client(db, client_schema)
+            data = {
+                "message": "INFO - Client created"
+            }
+            message_body = json.dumps(data)
+            routing_key = "client.main_router_create_client.info"
+            await rabbitmq_publish_logs.publish_log(message_body, routing_key)
             return db_client
         # Decodificar el token
         payload = security.decode_token(token)
         # Validar fecha expiración del token
         is_expirated = security.validar_fecha_expiracion(payload)
         if(is_expirated):
+            data = {
+                "message": "ERROR - The token is expired, log in again"
+            }
+            message_body = json.dumps(data)
+            routing_key = "client.main_router_create_client.error"
+            await rabbitmq_publish_logs.publish_log(message_body, routing_key)
             raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
         else:
             es_admin = security.validar_es_admin(payload)
             if(es_admin):
                 db_client = await crud.create_client(db, client_schema)
+                data = {
+                    "message": "INFO - Client created"
+                }
+                message_body = json.dumps(data)
+                routing_key = "client.main_router_create_client.info"
+                await rabbitmq_publish_logs.publish_log(message_body, routing_key)
                 return db_client 
             else:
+                data = {
+                    "message": "ERROR - You don't have permissions"
+                }
+                message_body = json.dumps(data)
+                routing_key = "client.main_router_create_client.error"
+                await rabbitmq_publish_logs.publish_log(message_body, routing_key)
                 raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
     except Exception as exc:  # @ToDo: To broad exception
         data = {
-            "message": "ERROR - Error al inicializar el servicio Client"
+            "message": "ERROR - Error creating client"
         }
         message_body = json.dumps(data)
-        routing_key = "client.main_startup_event.error"
-        await rabbitmq.publish_log(message_body, routing_key)
+        routing_key = "client.main_router_create_client.error"
+        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error creating client: {exc}")
 
 
@@ -98,15 +122,39 @@ async def update_client(
         # Validar fecha expiración del token
         is_expirated = security.validar_fecha_expiracion(payload)
         if(is_expirated):
+            data = {
+                "message": "ERROR - The token is expired, log in again"
+            }
+            message_body = json.dumps(data)
+            routing_key = "client.main_router_update_client.error"
+            await rabbitmq_publish_logs.publish_log(message_body, routing_key)
             raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
         else:
             es_admin = security.validar_es_admin(payload)
             client_id_token = payload["id_client"]
             if(es_admin==False and client_id!=client_id_token):
+                data = {
+                    "message": "ERROR - You don't have permissions"
+                }
+                message_body = json.dumps(data)
+                routing_key = "client.main_router_update_client.error"
+                await rabbitmq_publish_logs.publish_log(message_body, routing_key)
                 raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
             db_client = await crud.update_client(db, client_id, client_schema)
+            data = {
+                "message": "INFO - Client updated"
+            }
+            message_body = json.dumps(data)
+            routing_key = "client.main_router_update_client.info"
+            await rabbitmq_publish_logs.publish_log(message_body, routing_key)
             return db_client
     except Exception as exc:  # @ToDo: To broad exception
+        data = {
+            "message": "ERROR - Error updating client"
+        }
+        message_body = json.dumps(data)
+        routing_key = "client.main_router_update_client.error"
+        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error updating client: {exc}")
 
 
@@ -122,6 +170,12 @@ async def get_client_list(
     """Retrieve client list"""
     logger.debug("GET '/client' endpoint called.")
     client_list = await crud.get_client_list(db)
+    data = {
+        "message": "INFO - Client list obtained"
+    }
+    message_body = json.dumps(data)
+    routing_key = "client.main_router_get_client_list.info"
+    await rabbitmq_publish_logs.publish_log(message_body, routing_key)
     return client_list
 
 
@@ -150,14 +204,38 @@ async def get_single_client(
     # validar fecha expiración del token
     is_expirated = security.validar_fecha_expiracion(payload)
     if(is_expirated):
+        data = {
+            "message": "ERROR - The token is expired, log in again"
+        }
+        message_body = json.dumps(data)
+        routing_key = "client.main_router_get_single_client.error"
+        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
     else:
         es_admin = security.validar_es_admin(payload)
         if(es_admin==False):
+            data = {
+                "message": "ERROR - You don't have permissions"
+            }
+            message_body = json.dumps(data)
+            routing_key = "client.main_router_get_single_client.error"
+            await rabbitmq_publish_logs.publish_log(message_body, routing_key)
             raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
     client = await crud.get_client(db, client_id)
     if not client:
+        data = {
+            "message": "ERROR - Client not found"
+        }
+        message_body = json.dumps(data)
+        routing_key = "client.main_router_get_single_client.error"
+        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
         raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Client {client_id} not found")
+    data = {
+        "message": "INFO - Client obtained"
+    }
+    message_body = json.dumps(data)
+    routing_key = "client.main_router_get_single_client.info"
+    await rabbitmq_publish_logs.publish_log(message_body, routing_key)
     return client
 
 
@@ -180,8 +258,20 @@ async def get_token(
         client = await crud.get_client_by_username_and_pass(db, username, password)
         if not client:
             authenticated = False
+            data = {
+                "message": "ERROR - Client not found"
+            }
+            message_body = json.dumps(data)
+            routing_key = "client.main_router_get_token.error"
+            await rabbitmq_publish_logs.publish_log(message_body, routing_key)
             raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Client {username} not found")
         else: 
+            data = {
+                "message": "INFO - Client authenticated"
+            }
+            message_body = json.dumps(data)
+            routing_key = "client.main_router_get_token.info"
+            await rabbitmq_publish_logs.publish_log(message_body, routing_key)
             authenticated = True
         if authenticated:
             # Aquí puedes generar un token JWT si la autenticación es exitosa
@@ -191,10 +281,28 @@ async def get_token(
             expiration_time_serializable = expiration_time.isoformat()
             payload = {'username': client.username, 'id_client':client.id_client, 'email':client.email, 'role': client.role, 'fecha_expiracion': expiration_time_serializable}
             token = jwt.encode(payload, private_key_pem, algorithm='RS256')
+            data = {
+                "message": "INFO - Token generated"
+            }
+            message_body = json.dumps(data)
+            routing_key = "client.main_router_get_token.info"
+            await rabbitmq_publish_logs.publish_log(message_body, routing_key)
             return {"token": token}
         else:
+            data = {
+                "message": "ERROR - Incorrect credentials generating the token"
+            }
+            message_body = json.dumps(data)
+            routing_key = "client.main_router_get_token.error"
+            await rabbitmq_publish_logs.publish_log(message_body, routing_key)
             return {"message": "Credenciales incorrectas"}, 401    
     except Exception as exc:
+        data = {
+            "message": "ERROR - Error generating the token"
+        }
+        message_body = json.dumps(data)
+        routing_key = "client.main_router_get_token.error"
+        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error generando token: {exc}")
 
 
