@@ -230,10 +230,9 @@ async def publish_response(message_body, routing_key):
         routing_key=routing_key)
 
 
-
 async def subscribe_key_created():
     # Create a queue
-    queue_name = "client.key_created"
+    queue_name = "client.key_created_delivery"
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
     routing_key = "client.key_created"
@@ -242,6 +241,7 @@ async def subscribe_key_created():
     async with queue.iterator() as queue_iter:
         async for message in queue_iter:
             await on_delivered_message_key_created(message)
+
 
 async def on_delivered_message_key_created(message):
     async with message.process():

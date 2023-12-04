@@ -95,7 +95,7 @@ async def subscribe_delivered():
 
 async def subscribe_key_created():
     # Create a queue
-    queue_name = "client.key_created"
+    queue_name = "client.key_created_order"
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
     routing_key = "client.key_created"
@@ -112,7 +112,6 @@ async def on_delivering_message(message):
         db = SessionLocal()
         db_order = await crud.change_order_status(db, delivery['id_order'], models.Order.STATUS_DELIVERING)
         await db.close()
-
 
 
 async def subscribe_delivering():

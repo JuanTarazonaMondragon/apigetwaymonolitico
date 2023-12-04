@@ -55,13 +55,13 @@ async def startup_event():
         await rabbitmq.subscribe_channel()
         await rabbitmq_publish_logs.subscribe_channel()
         register_consul_service()
+        asyncio.create_task(rabbitmq.subscribe_key_created())
         asyncio.create_task(rabbitmq.subscribe_delivery_checked())
         asyncio.create_task(rabbitmq.subscribe_payment_checked())
         asyncio.create_task(rabbitmq.subscribe_delivery_canceled())
         asyncio.create_task(rabbitmq.subscribe_pieces())
         asyncio.create_task(rabbitmq.subscribe_delivering())
         asyncio.create_task(rabbitmq.subscribe_delivered())
-        asyncio.create_task(rabbitmq.subscribe_key_created())
         data = {
             "message": "INFO - Servicio Order inicializado correctamente"
         }

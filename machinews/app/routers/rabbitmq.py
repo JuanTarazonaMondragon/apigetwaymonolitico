@@ -60,7 +60,7 @@ async def publish(message_body, routing_key):
 
 async def subscribe_key_created():
     # Create a queue
-    queue_name = "client.key_created"
+    queue_name = "client.key_created_machine"
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
     routing_key = "client.key_created"

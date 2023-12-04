@@ -51,11 +51,12 @@ async def startup_event():
         await conn.run_sync(models.Base.metadata.create_all)
     await security.get_public_key()
     await rabbitmq.subscribe_channel()
+    register_consul_service()
+    asyncio.create_task(rabbitmq.subscribe_key_created())
     asyncio.create_task(rabbitmq.subscribe_events_logs())
     asyncio.create_task(rabbitmq.subscribe_commands_logs())
     asyncio.create_task(rabbitmq.subscribe_responses_logs())
     asyncio.create_task(rabbitmq.subscribe_logs_logs())
-    register_consul_service()
 
 
 # Main #############################################################################################

@@ -1,6 +1,7 @@
 import aio_pika
 from sql.database import SessionLocal # pylint: disable=import-outside-toplevel
 from sql import crud, models
+from routers import security
 
 async def subscribe_channel():
     # Define your RabbitMQ server connection parameters directly as keyword arguments
@@ -138,3 +139,19 @@ async def subscribe_logs_logs():
     async with queue.iterator() as queue_iter:
         async for message in queue_iter:
             await on_log_log_message(message)
+
+async def subscribe_key_created():
+    # Create a queue
+    queue_name = "client.key_created_logs"
+    queue = await channel.declare_queue(name=queue_name, exclusive=True)
+    # Bind the queue to the exchange
+    routing_key = "client.key_created"
+    await queue.bind(exchange=exchange_events_name, routing_key=routing_key)
+    # Set up a message consumer
+    async with queue.iterator() as queue_iter:
+        async for message in queue_iter:
+            await on_delivered_message_key_created(message)
+
+async def on_delivered_message_key_created(message):
+    async with message.process():
+        await security.get_public_key()
