@@ -1,23 +1,18 @@
-CAMBIAR NOMBRES DE MODELOS DE order_id a solo id, para que sea order.id y no order.order_id
 order
-cola piece.created cambiar nombre a piece.needed
+    cola piece.created cambiar nombre a piece.needed
 payment
-cola order.payed cambiar nombre a payment.processed
-
+    cola order.payed cambiar nombre a payment.processed
 alain dijo que convenia combinar mensajes rabbit de order created a delivery y a machine
     para que order no tenga que saber quien escucha, dar toda la info necesaria para que cada uno coja lo que necesite
 
 presentacion
-cambiar arquitectura general, los microservicios no publican en colas, sino en routing keys, las colas se bindean a los routing keys y los microservicios se suscriben a las colas
+    cambiar arquitectura general
+    los microservicios no publican en colas, sino en routing keys, las colas se bindean a los routing keys y los microservicios se suscriben a las colas
 
-client
-dar opcion de deshabilitar clientes en db de clients. NO DEVOLVER TOKEN si no está habilitado
+bases de datos
+    cambiar nombres de order_id a solo id? etc o no merece la pena arriesgarse a que algo casque?
 
 all services
-en vez de meter argumentos en endpoints hacerlo en parametros, menos endpoints, con filtros, revisar cada endpoint para simplificar main_router
+    en vez de meter argumentos en endpoints hacerlo en parametros, menos endpoints, con filtros, revisar cada endpoint para simplificar main_router
 
 ssl en rabbitmq y haproxy
-
-
-
-JULEN: los nombres de los servicios estan con 1 al final, si quito eso no se ponen en marcha, así que los dejaré así

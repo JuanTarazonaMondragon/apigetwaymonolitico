@@ -196,16 +196,27 @@ services:
     image: macc-aas-rabbitmq
     container_name: macc-aas-rabbitmq
     ports:
-      - "15672:15672"  # Port For RabbitMQ Web UI
-      - "5672:5672"    # Port For RabbitMQ Service
+      - "15671:15671"  # Port For RabbitMQ Web UI
+      - "5671:5671"    # Port For RabbitMQ Service
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:15672/"]
+      test: ["CMD", "curl", "-f", "http://localhost:15671/"]
       interval: 2s
       timeout: 2s
       retries: 10
+    volumes:
+      #- './rabbitmq/certs/cert.pem:/etc/ssl/certs/cert.pem'
+      - './rabbitmq/certs/rabbitmq_cert.pem:/etc/ssl/certs/rabbitmq_cert.pem'
+      - './rabbitmq/certs/rabbitmq_key.pem:/etc/ssl/certs/rabbitmq_key.pem'
+      - './rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf'
     environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: user
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
+      RABBITMQ_DEFAULT_VHOST: "/"
+      #RABBITMQ_SSL_CACERTFILE: /etc/ssl/certs/cert.pem
+      #RABBITMQ_SSL_CERTFILE: /etc/ssl/certs/rabbitmq_cert.pem
+      #RABBITMQ_SSL_KEYFILE: /etc/ssl/certs/rabbitmq_key.pem
+      #RABBITMQ_SSL_VERIFY: verify_none
+      #RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: false
     networks:
       bridge-network:
         ipv4_address: '${RABBITMQ_IP}'

@@ -10,7 +10,8 @@ async def subscribe_channel():
         port=5672,
         virtualhost='/',
         login='user',
-        password='user'
+        password='user',
+        ssl=True
     )
     # Create a channel
     global channel
