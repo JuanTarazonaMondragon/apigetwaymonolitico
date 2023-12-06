@@ -15,20 +15,11 @@ logger = logging.getLogger(__name__)
 
 public_key = ""
 
-class HealthManager:
-    def __init__(self):
-        self.status = False
-
-    def get_health_status(self):
-        return self.status
-
-    def set_health_status(self, status):
-        self.status = status
-
-health_manager = HealthManager()
-
-async def getHealthManagerStatus():
-    return health_manager.get_health_status()
+async def isTherePublicKey():
+    if public_key == "":
+        return await get_public_key()
+    else:
+        return True
 
 async def get_public_key():
     global public_key
@@ -37,12 +28,10 @@ async def get_public_key():
         response = requests.get(f"http://{ret['Address']}:{ret['Port']}/client/get/key")
         if response.status_code == 200:
             public_key = response.text.strip('"').replace("\\n", "\n")
-            health_manager.set_health_status(True)
             return True
-        else:
-            health_manager.set_health_status(False)
+        return False
     except requests.RequestException as e:
-        health_manager.set_health_status(False)
+        return False
 
 def generar_claves():
     private_key = rsa.generate_private_key(
@@ -76,9 +65,7 @@ def generar_claves():
 
 def decode_token(token:str):
     try:
-        print('payment - security - decode_token - public_key: ', public_key)
         payload = json.loads(json.dumps(jwt.decode(token, public_key, ['RS256'])))
-        print('payment - security - decode_token - payload ------------->', payload)
         return payload
     except Exception as exc:  # @ToDo: To broad exception
         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error decoding the token: {exc}")

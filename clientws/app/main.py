@@ -60,7 +60,7 @@ async def startup_event():
         }
         message_body = json.dumps(data)
         routing_key = "client.key_created"
-        await rabbitmq.publish_key(message_body, routing_key)
+        await rabbitmq.publish_event(message_body, routing_key)
         data2 = {
             "message": "INFO - Servicio Delivery inicializado correctamente"
         }

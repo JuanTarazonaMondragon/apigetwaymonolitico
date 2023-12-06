@@ -25,7 +25,7 @@ router = APIRouter()
 async def health_check():
     """Endpoint to check if everything started correctly."""
     logger.debug("GET '/delivery/health' endpoint called.")
-    if await security.getHealthManagerStatus():
+    if await security.isTherePublicKey():
         return {"detail": "Service Healthy."}
     else:
         raise_and_log_error(logger, status.HTTP_503_SERVICE_UNAVAILABLE, "Service Unavailable.")

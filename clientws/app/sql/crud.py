@@ -7,7 +7,6 @@ from sqlalchemy.future import select
 from . import models
 import json
 from routers.rabbitmq import publish_event
-from routers.rabbitmq import publish_key
 
 logger = logging.getLogger(__name__)
 
@@ -75,12 +74,6 @@ async def get_client(db: AsyncSession, client_id):
 
 async def get_client_by_username_and_pass(db: AsyncSession, username, password):
     """Load a client from the database."""
-    data = {
-        "message": "public key creado!!"
-    }
-    message_body = json.dumps(data)
-    routing_key = "client.key_created"
-    await publish_key(message_body, routing_key)
     return await get_element_by_username_and_pass(db, models.Client, username, password)
 
 

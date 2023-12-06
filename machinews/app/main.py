@@ -50,9 +50,9 @@ async def startup_event():
         logger.info("Creating database tables")
         await rabbitmq.subscribe_channel()
         await rabbitmq_publish_logs.subscribe_channel()
-        register_consul_service()
         asyncio.create_task(rabbitmq.subscribe_key_created())
         await security.get_public_key()
+        register_consul_service()
         asyncio.create_task(rabbitmq.subscribe())
         data = {
             "message": "INFO - Servicio Machine inicializado correctamente"

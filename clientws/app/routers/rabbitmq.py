@@ -30,13 +30,3 @@ async def publish_event(message_body, routing_key):
             content_type="text/plain"
         ),
         routing_key=routing_key)
-
-
-async def publish_key(message_body, routing_key):
-    # Publish the message to the exchange
-    await exchange_events.publish(
-        aio_pika.Message(
-            body=message_body.encode(),
-            content_type="text/plain"
-        ),
-        routing_key=routing_key)
