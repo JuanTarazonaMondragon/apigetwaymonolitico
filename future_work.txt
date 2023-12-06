@@ -5,4 +5,10 @@ presentacion
 all services
     en vez de meter argumentos en endpoints hacerlo en parametros, menos endpoints, con filtros, revisar cada endpoint para simplificar main_router
 
+quitar __pycharm__ etc del github
+
+borrar bases de datos para la demo y preparar parametros con ids correctos
+
 JULEN: preparar demo postman
+
+update client con PUT en vez de con POST?
