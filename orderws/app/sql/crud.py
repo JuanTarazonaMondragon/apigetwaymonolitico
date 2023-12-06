@@ -152,7 +152,7 @@ async def create_piece(db: AsyncSession, piece):
     }
     # Crear evento con nueva order, indicando ID de cliente y cantidad de piezas.
     message_body = json.dumps(data)
-    routing_key = "piece.created"
+    routing_key = "piece.needed"
     await publish_event(message_body, routing_key)
     return db_piece
 

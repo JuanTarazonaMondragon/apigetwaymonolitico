@@ -39,10 +39,10 @@ async def on_message(message):
 
 async def subscribe():
     # Create queue
-    queue_name = "piece.created"
+    queue_name = "piece.needed"
     queue = await channel.declare_queue(name=queue_name, exclusive=True)
     # Bind the queue to the exchange
-    routing_key = "piece.created"
+    routing_key = "piece.needed"
     await queue.bind(exchange=exchange_name, routing_key=routing_key)
     # Set up a message consumer
     async with queue.iterator() as queue_iter:

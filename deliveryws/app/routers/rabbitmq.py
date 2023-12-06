@@ -156,9 +156,13 @@ async def on_message_delivery_check(message):
             "id_order": order['id_order'],
             "status": address_check
         }
+        if address_check:
+            status_delivery_address_check = models.Delivery.STATUS_CREATED
+        else:
+            status_delivery_address_check = models.Delivery.STATUS_CANCELED
         db_delivery = models.Delivery(
             id_order=order['id_order'],
-            status_delivery=models.Delivery.STATUS_CREATED,
+            status_delivery=status_delivery_address_check,
             address=db_client.address,
             postal_code=db_client.postal_code
         )
