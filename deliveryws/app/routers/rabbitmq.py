@@ -86,26 +86,6 @@ async def subscribe_client_updated():
             await on_client_updated_message(message)
 
 
-async def on_producing_message(message):
-    async with message.process():
-        delivery = json.loads(message.body)
-        db = SessionLocal()
-        await crud.create_delivery(db, delivery)
-        await db.close()
-
-
-async def subscribe_producing():
-    # Create queue
-    queue_name = "order.producing"
-    queue = await channel.declare_queue(name=queue_name, exclusive=True)
-    # Bind the queue to the exchange
-    routing_key = "order.producing"
-    await queue.bind(exchange=exchange_events_name, routing_key=routing_key)
-    # Set up a message consumer
-    async with queue.iterator() as queue_iter:
-        async for message in queue_iter:
-            await on_producing_message(message)
-
 
 async def on_produced_message(message):
     async with message.process():
