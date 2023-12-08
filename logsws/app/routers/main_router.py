@@ -2,7 +2,7 @@
 """FastAPI router definitions."""
 import logging
 from typing import List
-from fastapi import APIRouter, Depends, status, Header
+from fastapi import APIRouter, Depends, status, Header, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from dependencies import get_db
 from sql import crud, schemas, models
@@ -28,7 +28,7 @@ async def health_check():
 
 
 @router.get(
-    "/logs/{number_of_logs}",
+    "/logs",
     summary="Retrieve certain number of logs",
     responses={
         status.HTTP_200_OK: {
@@ -42,7 +42,7 @@ async def health_check():
     tags=['Logs']
 )
 async def get_logs(
-        number_of_logs: int,
+        number_of_logs: int = Query(..., description="Number of logs to obtain"),
         db: AsyncSession = Depends(get_db),
         token: str = Header(..., description="JWT Token in the Header")
 ):
