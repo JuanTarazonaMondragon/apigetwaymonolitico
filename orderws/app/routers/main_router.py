@@ -2,7 +2,7 @@
 """FastAPI router definitions."""
 import logging
 from typing import List
-from fastapi import APIRouter, Depends, status, Header
+from fastapi import APIRouter, Depends, status, Header, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from dependencies import get_db
 from sql import crud, schemas
@@ -76,62 +76,9 @@ async def create_order(
         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error creating order: {exc}")
 
 
+
 @router.get(
     "/order",
-    response_model=List[schemas.Order],
-    summary="Retrieve order list",
-    tags=["Order", "List"]  # Optional so it appears grouped in documentation
-)
-async def get_order_list(
-        db: AsyncSession = Depends(get_db),
-        token: str = Header(..., description="JWT Token in the Header")
-):
-    try:
-        """Retrieve order list"""
-        logger.debug("GET '/order' endpoint called.")
-        #decodificar el token
-        payload = security.decode_token(token)
-        # validar fecha expiración del token
-        is_expirated = security.validar_fecha_expiracion(payload)
-        if(is_expirated):
-            data = {
-                "message": "ERROR - Token expired, log in again"
-            }
-            message_body = json.dumps(data)
-            routing_key = "order.main_router_get_order_list.error"
-            await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-            raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
-        else:
-            es_admin = security.validar_es_admin(payload)
-            if(es_admin):
-                order_list = await crud.get_orders_list(db)
-                data = {
-                    "message": "INFO - Order list obtained"
-                }
-                message_body = json.dumps(data)
-                routing_key = "order.main_router_get_order_list.info"
-                await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-                return order_list
-            else:
-                data = {
-                    "message": "ERROR - You don't have permissions"
-                }
-                message_body = json.dumps(data)
-                routing_key = "order.main_router_get_order_list.error"
-                await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-                raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
-    except Exception as exc:  # @ToDo: To broad exception
-        data = {
-            "message": "ERROR - Error obtaining order list"
-        }
-        message_body = json.dumps(data)
-        routing_key = "order.main_router_get_order_list.error"
-        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error obtaining order list: {exc}")
-
-
-@router.get(
-    "/order/{order_id}",
     summary="Retrieve single order by id",
     responses={
         status.HTTP_200_OK: {
@@ -145,16 +92,108 @@ async def get_order_list(
     tags=['Order']
 )
 async def get_single_order(
-        order_id: int,
+        order_id: int = Query(None, description="Order ID"),
+        client_id: int = Query(None, description="Client ID"),
         db: AsyncSession = Depends(get_db),
         token: str = Header(..., description="JWT Token in the Header")
 ):
     """Retrieve single order by id"""
-    logger.debug("GET '/order/%i' endpoint called.", order_id)
-    try:
-        """Retrieve order list"""
-        logger.debug("GET '/order/%i' endpoint called.")
-        #decodificar el token
+    logger.debug("GET '/order' endpoint called.", order_id)
+
+    if order_id is None and client_id is None:
+        try:
+            #decodificar el token
+            payload = security.decode_token(token)
+            # validar fecha expiración del token
+            is_expirated = security.validar_fecha_expiracion(payload)
+            if(is_expirated):
+                data = {
+                    "message": "ERROR - Token expired, log in again"
+                }
+                message_body = json.dumps(data)
+                routing_key = "order.main_router_get_order_list.error"
+                await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+                raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
+            else:
+                es_admin = security.validar_es_admin(payload)
+                if(es_admin):
+                    order_list = await crud.get_orders_list(db)
+                    data = {
+                        "message": "INFO - Order list obtained"
+                    }
+                    message_body = json.dumps(data)
+                    routing_key = "order.main_router_get_order_list.info"
+                    await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+                    return order_list
+                else:
+                    data = {
+                        "message": "ERROR - You don't have permissions"
+                    }
+                    message_body = json.dumps(data)
+                    routing_key = "order.main_router_get_order_list.error"
+                    await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+                    raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
+        except Exception as exc:  # @ToDo: To broad exception
+            data = {
+                "message": "ERROR - Error obtaining order list"
+            }
+            message_body = json.dumps(data)
+            routing_key = "order.main_router_get_order_list.error"
+            await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+            raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error obtaining order list: {exc}")
+
+    if order_id is not None and client_id is None:
+        try:
+            """Retrieve order list"""
+            #decodificar el token
+            payload = security.decode_token(token)
+            # validar fecha expiración del token
+            is_expirated = security.validar_fecha_expiracion(payload)
+            if(is_expirated):
+                data = {
+                    "message": "ERROR - Token expired, log in again"
+                }
+                message_body = json.dumps(data)
+                routing_key = "order.main_router_get_single_order.error"
+                await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+                raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
+            else:
+                es_admin = security.validar_es_admin(payload)
+                client_id = payload["id_client"]
+                order = await crud.get_order(db, order_id)
+                if(es_admin==False and order.id_client!=client_id):
+                    data = {
+                        "message": "ERROR - You don't have permissions"
+                    }
+                    message_body = json.dumps(data)
+                    routing_key = "order.main_router_get_single_order.error"
+                    await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+                    raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
+            if not order:
+                data = {
+                    "message": "ERROR - {order_id} Order not found"
+                }
+                message_body = json.dumps(data)
+                routing_key = "order.main_router_get_single_order.error"
+                await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+                raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Order {order_id} not found")
+            data = {
+                "message": "INFO - Order obtained"
+            }
+            message_body = json.dumps(data)
+            routing_key = "order.main_router_get_single_order.info"
+            await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+            return order
+        except Exception as exc:  # @ToDo: To broad exception
+            data = {
+                "message": "ERROR - Error obtaining the order"
+            }
+            message_body = json.dumps(data)
+            routing_key = "order.main_router_get_single_order.error"
+            await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+            raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error obtaining order: {exc}")
+
+    if order_id is None and client_id is not None:
         payload = security.decode_token(token)
         # validar fecha expiración del token
         is_expirated = security.validar_fecha_expiracion(payload)
@@ -163,109 +202,101 @@ async def get_single_order(
                 "message": "ERROR - Token expired, log in again"
             }
             message_body = json.dumps(data)
-            routing_key = "order.main_router_get_single_order.error"
+            routing_key = "order.main_router_get_single_client.error"
             await rabbitmq_publish_logs.publish_log(message_body, routing_key)
             raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
         else:
             es_admin = security.validar_es_admin(payload)
-            client_id = payload["id_client"]
-            order = await crud.get_order(db, order_id)
-            if(es_admin==False and order.id_client!=client_id):
+            client_id_token = payload["id_client"]
+            if(es_admin==False and client_id!=client_id_token):
                 data = {
                     "message": "ERROR - You don't have permissions"
                 }
                 message_body = json.dumps(data)
-                routing_key = "order.main_router_get_single_order.error"
+                routing_key = "order.main_router_get_single_client.error"
                 await rabbitmq_publish_logs.publish_log(message_body, routing_key)
                 raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
-        if not order:
+        orders = await crud.get_clients_orders(db, client_id)
+        if not orders:
             data = {
-                "message": "ERROR - {order_id} Order not found"
-            }
-            message_body = json.dumps(data)
-            routing_key = "order.main_router_get_single_order.error"
-            await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-            raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Order {order_id} not found")
-        data = {
-            "message": "INFO - Order obtained"
-        }
-        message_body = json.dumps(data)
-        routing_key = "order.main_router_get_single_order.info"
-        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-        return order
-    except Exception as exc:  # @ToDo: To broad exception
-        data = {
-            "message": "ERROR - Error obtaining the order"
-        }
-        message_body = json.dumps(data)
-        routing_key = "order.main_router_get_single_order.error"
-        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error obtaining order: {exc}")
-
-
-@router.get(
-    "/order/client/{client_id}",
-    summary="Retrieve client's orders by id",
-    responses={
-        status.HTTP_200_OK: {
-            "model": schemas.Order,
-            "description": "Requested Orders."
-        },
-        status.HTTP_404_NOT_FOUND: {
-            "model": schemas.Message, "description": "Orders not found"
-        }
-    },
-    tags=['Orders'],
-)
-async def get_single_client(
-        client_id: int,
-        db: AsyncSession = Depends(get_db),
-        token: str = Header(..., description="JWT Token in the Header")
-):
-    """Retrieve client's orders by id"""
-    logger.debug("GET '/order/client/%i' endpoint called.", client_id)
-    payload = security.decode_token(token)
-    # validar fecha expiración del token
-    is_expirated = security.validar_fecha_expiracion(payload)
-    if(is_expirated):
-        data = {
-            "message": "ERROR - Token expired, log in again"
-        }
-        message_body = json.dumps(data)
-        routing_key = "order.main_router_get_single_client.error"
-        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
-    else:
-        es_admin = security.validar_es_admin(payload)
-        client_id_token = payload["id_client"]
-        if(es_admin==False and client_id!=client_id_token):
-            data = {
-                "message": "ERROR - You don't have permissions"
+                "message": "ERROR - Clinet {client_id}'s orders not found"
             }
             message_body = json.dumps(data)
             routing_key = "order.main_router_get_single_client.error"
             await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-            raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
-    orders = await crud.get_clients_orders(db, client_id)
-    if not orders:
+            raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Client {client_id}'s orders not found")
         data = {
-            "message": "ERROR - Clinet {client_id}'s orders not found"
+            "message": "INFO - Orders of client {cliend_id} obtained"
         }
         message_body = json.dumps(data)
-        routing_key = "order.main_router_get_single_client.error"
+        routing_key = "order.main_router_get_single_client.info"
         await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-        raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Client {client_id}'s orders not found")
-    data = {
-        "message": "INFO - Orders of client {cliend_id} obtained"
-    }
-    message_body = json.dumps(data)
-    routing_key = "order.main_router_get_single_client.info"
-    await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-    return orders
+        return orders
+
+## Cambiar endpoint
+# @router.get(
+#     "/order/client/{client_id}",
+#     summary="Retrieve client's orders by id",
+#     responses={
+#         status.HTTP_200_OK: {
+#             "model": schemas.Order,
+#             "description": "Requested Orders."
+#         },
+#         status.HTTP_404_NOT_FOUND: {
+#             "model": schemas.Message, "description": "Orders not found"
+#         }
+#     },
+#     tags=['Orders'],
+# )
+# async def get_single_client(
+#         client_id: int,
+#         db: AsyncSession = Depends(get_db),
+#         token: str = Header(..., description="JWT Token in the Header")
+# ):
+#     """Retrieve client's orders by id"""
+#     logger.debug("GET '/order/client/%i' endpoint called.", client_id)
+#     payload = security.decode_token(token)
+#     # validar fecha expiración del token
+#     is_expirated = security.validar_fecha_expiracion(payload)
+#     if(is_expirated):
+#         data = {
+#             "message": "ERROR - Token expired, log in again"
+#         }
+#         message_body = json.dumps(data)
+#         routing_key = "order.main_router_get_single_client.error"
+#         await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+#         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
+#     else:
+#         es_admin = security.validar_es_admin(payload)
+#         client_id_token = payload["id_client"]
+#         if(es_admin==False and client_id!=client_id_token):
+#             data = {
+#                 "message": "ERROR - You don't have permissions"
+#             }
+#             message_body = json.dumps(data)
+#             routing_key = "order.main_router_get_single_client.error"
+#             await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+#             raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
+#     orders = await crud.get_clients_orders(db, client_id)
+#     if not orders:
+#         data = {
+#             "message": "ERROR - Clinet {client_id}'s orders not found"
+#         }
+#         message_body = json.dumps(data)
+#         routing_key = "order.main_router_get_single_client.error"
+#         await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+#         raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Client {client_id}'s orders not found")
+#     data = {
+#         "message": "INFO - Orders of client {cliend_id} obtained"
+#     }
+#     message_body = json.dumps(data)
+#     routing_key = "order.main_router_get_single_client.info"
+#     await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+#     return orders
 
 
 @router.get(
-    "/order/sagashistory/{order_id}",
+    "/order/sagashistory",
     summary="Retrieve sagas history of a certain order",
     responses={
         status.HTTP_200_OK: {
@@ -279,7 +310,7 @@ async def get_single_client(
     tags=['Order']
 )
 async def get_sagas_history(
-        order_id: int,
+        order_id: int = Query(..., description="Order ID"),
         db: AsyncSession = Depends(get_db),
         token: str = Header(..., description="JWT Token in the Header")
 ):
