@@ -158,29 +158,29 @@ async def update_client(
         raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"Error updating client: {exc}")
 
 
+# @router.get(
+#     "/client",
+#     response_model=List[schemas.Client],
+#     summary="Retrieve client list",
+#     tags=["Client", "List"]  # Optional so it appears grouped in documentation
+# )
+# async def get_client_list(
+#         db: AsyncSession = Depends(get_db)
+# ):
+#     """Retrieve client list"""
+#     logger.debug("GET '/client' endpoint called.")
+#     client_list = await crud.get_client_list(db)
+#     data = {
+#         "message": "INFO - Client list obtained"
+#     }
+#     message_body = json.dumps(data)
+#     routing_key = "client.main_router_get_client_list.info"
+#     await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+#     return client_list
+
+
 @router.get(
     "/client",
-    response_model=List[schemas.Client],
-    summary="Retrieve client list",
-    tags=["Client", "List"]  # Optional so it appears grouped in documentation
-)
-async def get_client_list(
-        db: AsyncSession = Depends(get_db)
-):
-    """Retrieve client list"""
-    logger.debug("GET '/client' endpoint called.")
-    client_list = await crud.get_client_list(db)
-    data = {
-        "message": "INFO - Client list obtained"
-    }
-    message_body = json.dumps(data)
-    routing_key = "client.main_router_get_client_list.info"
-    await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-    return client_list
-
-
-@router.get(
-    "/client/{client_id}",
     summary="Retrieve single client by id",
     responses={
         status.HTTP_200_OK: {
@@ -194,49 +194,60 @@ async def get_client_list(
     tags=['Client']
 )
 async def get_single_client(
-        client_id: int,
+        client_id: int = Query(None, description="Client ID"),
         db: AsyncSession = Depends(get_db),
         token: str = Header(..., description="JWT Token in the Header")
 ):
     """Retrieve single client by id"""
     logger.debug("GET '/client/%i' endpoint called.", client_id)
-    payload = security.decode_token(token)
-    # validar fecha expiración del token
-    is_expirated = security.validar_fecha_expiracion(payload)
-    if(is_expirated):
-        data = {
-            "message": "ERROR - The token is expired, log in again"
-        }
-        message_body = json.dumps(data)
-        routing_key = "client.main_router_get_single_client.error"
-        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-        raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
-    else:
-        es_admin = security.validar_es_admin(payload)
-        if(es_admin==False):
+
+    if client_id is not None:
+        payload = security.decode_token(token)
+        # validar fecha expiración del token
+        is_expirated = security.validar_fecha_expiracion(payload)
+        if(is_expirated):
             data = {
-                "message": "ERROR - You don't have permissions"
+                "message": "ERROR - The token is expired, log in again"
             }
             message_body = json.dumps(data)
             routing_key = "client.main_router_get_single_client.error"
             await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-            raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
-    client = await crud.get_client(db, client_id)
-    if not client:
+            raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"The token is expired, please log in again")
+        else:
+            es_admin = security.validar_es_admin(payload)
+            if(es_admin==False):
+                data = {
+                    "message": "ERROR - You don't have permissions"
+                }
+                message_body = json.dumps(data)
+                routing_key = "client.main_router_get_single_client.error"
+                await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+                raise_and_log_error(logger, status.HTTP_409_CONFLICT, f"You don't have permissions")
+        client = await crud.get_client(db, client_id)
+        if not client:
+            data = {
+                "message": "ERROR - Client not found"
+            }
+            message_body = json.dumps(data)
+            routing_key = "client.main_router_get_single_client.error"
+            await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+            raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Client {client_id} not found")
         data = {
-            "message": "ERROR - Client not found"
+            "message": "INFO - Client obtained"
         }
         message_body = json.dumps(data)
-        routing_key = "client.main_router_get_single_client.error"
+        routing_key = "client.main_router_get_single_client.info"
         await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-        raise_and_log_error(logger, status.HTTP_404_NOT_FOUND, f"Client {client_id} not found")
-    data = {
-        "message": "INFO - Client obtained"
-    }
-    message_body = json.dumps(data)
-    routing_key = "client.main_router_get_single_client.info"
-    await rabbitmq_publish_logs.publish_log(message_body, routing_key)
-    return client
+        return client
+    else:
+        client_list = await crud.get_client_list(db)
+        data = {
+            "message": "INFO - Client list obtained"
+        }
+        message_body = json.dumps(data)
+        routing_key = "client.main_router_get_client_list.info"
+        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+        return client_list
 
 
 @router.post(
