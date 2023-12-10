@@ -2,10 +2,12 @@
 """Main file to start FastAPI application."""
 import logging
 import os
+import json
 from fastapi import FastAPI
-from routers import main_router, rabbitmq, security
+from routers import main_router, rabbitmq, security, rabbitmq_publish_logs
 from sql import models, database
 import asyncio
+from consulService.BLConsul import register_consul_service
 
 # Configure logging ################################################################################
 logger = logging.getLogger(__name__)
@@ -44,14 +46,35 @@ app.include_router(main_router.router)
 
 @app.on_event("startup")
 async def startup_event():
-    """Configuration to be executed when FastAPI server starts."""
-    logger.info("Creating database tables")
-    async with database.engine.begin() as conn:
-        await conn.run_sync(models.Base.metadata.create_all)
-    await security.get_public_key()
-    await rabbitmq.subscribe_channel()
-    asyncio.create_task(rabbitmq.subscribe_producing())
-    asyncio.create_task(rabbitmq.subscribe_produced())
+    try:
+        """Configuration to be executed when FastAPI server starts."""
+        logger.info("Creating database tables")
+        async with database.engine.begin() as conn:
+            await conn.run_sync(models.Base.metadata.create_all)
+        await rabbitmq.subscribe_channel()
+        await rabbitmq_publish_logs.subscribe_channel()
+        asyncio.create_task(rabbitmq.subscribe_key_created())
+        await security.get_public_key()
+        register_consul_service()
+        asyncio.create_task(rabbitmq.subscribe_client_created())
+        asyncio.create_task(rabbitmq.subscribe_client_updated())
+        asyncio.create_task(rabbitmq.subscribe_delivery_check())
+        asyncio.create_task(rabbitmq.subscribe_delivery_cancel())
+        asyncio.create_task(rabbitmq.subscribe_produced())
+        data = {
+            "message": "INFO - Servicio Delivery inicializado correctamente"
+        }
+        message_body = json.dumps(data)
+        routing_key = "delivery.main_startup_event.info"
+        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+    except:
+        data = {
+            "message": "ERROR - Error al inicializar el servicio Delivery"
+        }
+        message_body = json.dumps(data)
+        routing_key = "delivery.main_startup_event.error"
+        await rabbitmq_publish_logs.publish_log(message_body, routing_key)
+
 
 
 # Main #############################################################################################

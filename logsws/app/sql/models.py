@@ -40,13 +40,6 @@ class Log(BaseModel):
 
     __tablename__ = "log"
     id_log = Column(Integer, primary_key=True)
+    exchange = Column(String(256), nullable=False)
     routing_key = Column(String(256), nullable=False)
     data = Column(String(256), nullable=False)
-
-    # date = Column(DateTime(timezone=True), default=datetime.utcnow)
-
-    def as_dict(self):
-        """Return the payment item as dict."""
-        dictionary = super().as_dict()
-        dictionary['payment'] = [i.as_dict() for i in self.pieces]
-        return dictionary

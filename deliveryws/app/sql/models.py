@@ -38,22 +38,21 @@ class BaseModel(Base):
 class Delivery(BaseModel):
     """Deliveries database table representation."""
     STATUS_CREATED = "Created"
-    STATUS_INFORMED = "Informed"
-    STATUS_PREPARED = "Prepared"
+    STATUS_CANCELED = "Canceled"
     STATUS_DELIVERING = "Delivering"
     STATUS_DELIVERED = "Delivered"
 
     __tablename__ = "delivery"
     id_delivery = Column(Integer, primary_key=True)
     id_order = Column(Integer, nullable=False)
-    name = Column(String(256), nullable=True)
     address = Column(String(256), nullable=True)
+    postal_code = Column(Integer, nullable=True)
     status_delivery = Column(String(256), nullable=False, default=STATUS_CREATED)
 
-    # date = Column(DateTime(timezone=True), default=datetime.utcnow)
 
-    def as_dict(self):
-        """Return the payment item as dict."""
-        dictionary = super().as_dict()
-        dictionary['payment'] = [i.as_dict() for i in self.pieces]
-        return dictionary
+class Client(BaseModel):
+    """Client database table representation."""
+    __tablename__ = "clients"
+    id_client = Column(Integer, primary_key=True)
+    address = Column(TEXT, nullable=False)
+    postal_code = Column(Integer, nullable=False)

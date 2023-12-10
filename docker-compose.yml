@@ -1,258 +1,185 @@
 version: '3'
 
 services:
+  # Consul
+  consul:
+    image: macc-aas-consul
+    container_name: macc-aas-consul
+    ports:
+      - '8300:8300'
+      - '8301:8301'
+      - '8301:8301/udp'
+      - '8500:8500'     # Port For Consul Web UI
+      - '8600:8600'
+      - '8600:8600/udp'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8500/"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+    networks:
+      bridge-network:
+        ipv4_address: '${CONSUL_HOST}'
+
   # Service Logs
-  logs-r1:
-    hostname: logs-r1
-    container_name: macc-microservicios-logs-r1
-    #build: ./logsws
-    image: macc-microservicios-logs
+  logs1:
+    hostname: logs1
+    container_name: macc-aas-logs1
+    image: macc-aas-logs
     volumes:
       - './logsws/app:/code/app'
     ports:
       - '18010:${UVICORN_PORT}'
     environment:
-      - 'UVICORN_PORT=${UVICORN_PORT}'
+      SERVICE_NAME: logs
+      SERVICE_ID: logs1
+      CONSUL_HOST: ${CONSUL_HOST}
+      UVICORN_PORT: ${UVICORN_PORT}
     depends_on:
       rabbitmq:
         condition: service_healthy
+      consul:
+        condition: service_healthy
     networks:
-      network:
-        ipv4_address: '${SERVICE_LOGS_R1_IP}'
+      bridge-network:
     restart: unless-stopped
 
   # Service Client
-  client-r1:
-    hostname: client-r1
-    container_name: macc-microservicios-client-r1
-    #build: ./clientws
-    image: macc-microservicios-client
+  client1:
+    hostname: client1
+    container_name: macc-aas-client1
+    image: macc-aas-client
     volumes:
       - './clientws/app:/code/app'
     ports:
       - '18011:${UVICORN_PORT}'
     environment:
-      - 'UVICORN_PORT=${UVICORN_PORT}'
+      SERVICE_NAME: client
+      SERVICE_ID: client1
+      CONSUL_HOST: ${CONSUL_HOST}
+      UVICORN_PORT: ${UVICORN_PORT}
     depends_on:
       rabbitmq:
         condition: service_healthy
+      consul:
+        condition: service_healthy
     networks:
-      network:
-        ipv4_address: '${SERVICE_CLIENT_R1_IP}'
+      bridge-network:
     restart: unless-stopped
-  #client-r2:
-  #  hostname: client-r2
-  #  container_name: macc-microservicios-client-r2
-  #  #build: ./clientws
-  #  image: macc-microservicios-client
-  #  volumes:
-  #    - './clientws/app:/code/app'
-  #  ports:
-  #    - '18021:${UVICORN_PORT}'
-  #  environment:
-  #    - 'UVICORN_PORT=${UVICORN_PORT}'
-  #  depends_on:
-  #    - rabbitmq
-  #  networks:
-  #    network:
-  #      ipv4_address: '${SERVICE_CLIENT_R2_IP}'
-  #  restart: unless-stopped
 
   # Service Delivery
-  delivery-r1:
-    hostname: delivery-r1
-    container_name: macc-microservicios-delivery-r1
-    #build: ./deliveryws
-    image: macc-microservicios-delivery
+  delivery1:
+    hostname: delivery1
+    container_name: macc-aas-delivery1
+    image: macc-aas-delivery
     volumes:
       - './deliveryws/app:/code/app'
     ports:
       - '18012:${UVICORN_PORT}'
     environment:
-      - 'UVICORN_PORT=${UVICORN_PORT}'
+      SERVICE_NAME: delivery
+      SERVICE_ID: delivery1
+      CONSUL_HOST: ${CONSUL_HOST}
+      UVICORN_PORT: ${UVICORN_PORT}
     depends_on:
       rabbitmq:
         condition: service_healthy
+      consul:
+        condition: service_healthy
     networks:
-      network:
-        ipv4_address: '${SERVICE_DELIVERY_R1_IP}'
+      bridge-network:
     restart: unless-stopped
-  #delivery-r2:
-  #  hostname: delivery-r2
-  #  container_name: macc-microservicios-delivery-r2
-  #  #build: ./deliveryws
-  #  image: macc-microservicios-delivery
-  #  volumes:
-  #    - './deliveryws/app:/code/app'
-  #  ports:
-  #    - '18022:${UVICORN_PORT}'
-  #  environment:
-  #    - 'UVICORN_PORT=${UVICORN_PORT}'
-  #  depends_on:
-  #    - rabbitmq
-  #  networks:
-  #    network:
-  #      ipv4_address: '${SERVICE_DELIVERY_R2_IP}'
-  #  restart: unless-stopped
 
   # Service Machine
-  machine-r1:
-    hostname: machine-r1
-    container_name: macc-microservicios-machine-r1
-    #build: ./machinews
-    image: macc-microservicios-machine
+  machine1:
+    hostname: machine1
+    container_name: macc-aas-machine1
+    image: macc-aas-machine
     volumes:
       - './machinews/app:/code/app'
     ports:
       - '18013:${UVICORN_PORT}'
     environment:
-      - 'UVICORN_PORT=${UVICORN_PORT}'
+      SERVICE_NAME: machine
+      SERVICE_ID: machine1
+      CONSUL_HOST: ${CONSUL_HOST}
+      UVICORN_PORT: ${UVICORN_PORT}
     depends_on:
       rabbitmq:
         condition: service_healthy
+      consul:
+        condition: service_healthy
     networks:
-      network:
-        ipv4_address: '${SERVICE_MACHINE_R1_IP}'
+      bridge-network:
     restart: unless-stopped
-  #machine-r2:
-  #  hostname: machine-r2
-  #  container_name: macc-microservicios-machine-r2
-  #  #build: ./machinews
-  #  image: macc-microservicios-machine
-  #  volumes:
-  #    - './machinews/app:/code/app'
-  #  ports:
-  #    - '18023:${UVICORN_PORT}'
-  #  environment:
-  #    - 'UVICORN_PORT=${UVICORN_PORT}'
-  #  depends_on:
-  #    - rabbitmq
-  #  networks:
-  #    network:
-  #      ipv4_address: '${SERVICE_MACHINE_R2_IP}'
-  #  restart: unless-stopped
 
   # Service Order
-  order-r1:
-    hostname: order-r1
-    container_name: macc-microservicios-order-r1
-    #build: ./orderws
-    image: macc-microservicios-order
+  order1:
+    hostname: order1
+    container_name: macc-aas-order1
+    image: macc-aas-order
     volumes:
       - './orderws/app:/code/app'
     ports:
       - '18014:${UVICORN_PORT}'
     environment:
-      - 'UVICORN_PORT=${UVICORN_PORT}'
+      SERVICE_NAME: order
+      SERVICE_ID: order1
+      CONSUL_HOST: ${CONSUL_HOST}
+      UVICORN_PORT: ${UVICORN_PORT}
     depends_on:
       rabbitmq:
         condition: service_healthy
+      consul:
+        condition: service_healthy
     networks:
-      network:
-        ipv4_address: '${SERVICE_ORDER_R1_IP}'
+      bridge-network:
     restart: unless-stopped
-  #order-r2:
-  #  hostname: order-r2
-  #  container_name: macc-microservicios-order-r2
-  #  #build: ./orderws
-  #  image: macc-microservicios-order
-  #  volumes:
-  #    - './orderws/app:/code/app'
-  #  ports:
-  #    - '18024:${UVICORN_PORT}'
-  #  environment:
-  #    - 'UVICORN_PORT=${UVICORN_PORT}'
-  #  depends_on:
-  #    - rabbitmq
-  #  networks:
-  #    network:
-  #      ipv4_address: '${SERVICE_ORDER_R2_IP}'
-  #  restart: unless-stopped
 
   # Service Payment
-  payment-r1:
-    hostname: payment-r1
-    container_name: macc-microservicios-payment-r1
-    #build: ./paymentws
-    image: macc-microservicios-payment
+  payment1:
+    hostname: payment1
+    container_name: macc-aas-payment1
+    image: macc-aas-payment
     volumes:
       - './paymentws/app:/code/app'
     ports:
       - '18015:${UVICORN_PORT}'
     environment:
-      - 'UVICORN_PORT=${UVICORN_PORT}'
+      SERVICE_NAME: payment
+      SERVICE_ID: payment1
+      CONSUL_HOST: ${CONSUL_HOST}
+      UVICORN_PORT: ${UVICORN_PORT}
     depends_on:
       rabbitmq:
         condition: service_healthy
+      consul:
+        condition: service_healthy
     networks:
-      network:
-        ipv4_address: '${SERVICE_PAYMENT_R1_IP}'
+      bridge-network:
     restart: unless-stopped
-  #payment-r2:
-  #  hostname: payment-r2
-  #  container_name: macc-microservicios-payment-r2
-  #  #build: ./paymentws
-  #  image: macc-microservicios-payment
-  #  volumes:
-  #    - './paymentws/app:/code/app'
-  #  ports:
-  #    - '18025:${UVICORN_PORT}'
-  #  environment:
-  #    - 'UVICORN_PORT=${UVICORN_PORT}'
-  #  depends_on:
-  #    - rabbitmq
-  #  networks:
-  #    network:
-  #      ipv4_address: '${SERVICE_PAYMENT_R2_IP}'
-  #  restart: unless-stopped
 
   haproxy:
     hostname: haproxy
     image: haproxy:2.6-alpine
-    container_name: macc-microservicios-haproxy
+    container_name: macc-aas-haproxy
     ports:
       - '${HAPROXY_PORT}:${HAPROXY_PORT}'
-      - '${HAPROXY_STATS_PORT}:${HAPROXY_STATS_PORT}'
-    expose:
-      - '${HAPROXY_PORT}'
-      - '${HAPROXY_STATS_PORT}'
+      - '${HAPROXY_STATS_PORT}:${HAPROXY_STATS_PORT}' # Port For HAProxy Web UI = 18001
     networks:
-      network:
+      bridge-network:
         ipv4_address: '${HAPROXY_IP}'
     environment:
-      - 'SERVICE_LOGS_R1_IP=${SERVICE_LOGS_R1_IP}'
-    #  - 'SERVICE_LOGS_R2_IP=${SERVICE_LOGS_R2_IP}'
-      - 'SERVICE_CLIENT_R1_IP=${SERVICE_CLIENT_R1_IP}'
-    #  - 'SERVICE_CLIENT_R2_IP=${SERVICE_CLIENT_R2_IP}'
-      - 'SERVICE_DELIVERY_R1_IP=${SERVICE_DELIVERY_R1_IP}'
-    #  - 'SERVICE_DELIVERY_R2_IP=${SERVICE_DELIVERY_R2_IP}'
-      - 'SERVICE_MACHINE_R1_IP=${SERVICE_MACHINE_R1_IP}'
-    #  - 'SERVICE_MACHINE_R2_IP=${SERVICE_MACHINE_R2_IP}'
-      - 'SERVICE_ORDER_R1_IP=${SERVICE_ORDER_R1_IP}'
-    #  - 'SERVICE_ORDER_R2_IP=${SERVICE_ORDER_R2_IP}'
-      - 'SERVICE_PAYMENT_R1_IP=${SERVICE_PAYMENT_R1_IP}'
-    #  - 'SERVICE_PAYMENT_R2_IP=${SERVICE_PAYMENT_R2_IP}'
-      - 'SERVICE_LOGS_R1_PORT=${UVICORN_PORT}'
-    #  - 'SERVICE_CLIENT_R2_PORT=${UVICORN_PORT}'
-      - 'SERVICE_CLIENT_R1_PORT=${UVICORN_PORT}'
-    #  - 'SERVICE_CLIENT_R2_PORT=${UVICORN_PORT}'
-      - 'SERVICE_DELIVERY_R1_PORT=${UVICORN_PORT}'
-    #  - 'SERVICE_DELIVERY_R2_PORT=${UVICORN_PORT}'
-      - 'SERVICE_MACHINE_R1_PORT=${UVICORN_PORT}'
-    #  - 'SERVICE_MACHINE_R2_PORT=${UVICORN_PORT}'
-      - 'SERVICE_ORDER_R1_PORT=${UVICORN_PORT}'
-    #  - 'SERVICE_ORDER_R2_PORT=${UVICORN_PORT}'
-      - 'SERVICE_PAYMENT_R1_PORT=${UVICORN_PORT}'
-    #  - 'SERVICE_PAYMENT_R2_PORT=${UVICORN_PORT}'
       - 'HAPROXY_PORT=${HAPROXY_PORT}'
       - 'HAPROXY_STATS_PORT=${HAPROXY_STATS_PORT}'
+      - 'CONSUL_HOST=${CONSUL_HOST}'
     restart: unless-stopped
     volumes:
       - './apigateway/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg'
 
   rabbitmq:
-    image: macc-microservicios-rabbitmq
-    container_name: macc-microservicios-rabbitmq
+    image: macc-aas-rabbitmq
+    container_name: macc-aas-rabbitmq
     ports:
       - "15672:15672"  # Port For RabbitMQ Web UI
       - "5672:5672"    # Port For RabbitMQ Service
@@ -265,11 +192,11 @@ services:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: user
     networks:
-      network:
+      bridge-network:
         ipv4_address: '${RABBITMQ_IP}'
 
 networks:
-  network:
+  bridge-network:
     driver: bridge
     ipam:
       driver: default

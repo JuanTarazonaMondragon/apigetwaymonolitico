@@ -5,7 +5,8 @@ from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.sql import func
-from routers.rabbitmq import publish
+from sql.database import SessionLocal # pylint: disable=import-outside-toplevel
+from routers.rabbitmq import publish_event, publish_command
 from . import models
 import json
 
@@ -76,6 +77,13 @@ async def get_clients_orders(db: AsyncSession, client_id):
     return orders
 
 
+async def get_sagas_history_by_order_id(db: AsyncSession, id_order):
+    """Load all the sagas history of certain order from the database."""
+    stmt = select(models.SagasHistory).where(models.SagasHistory.id_order == id_order)
+    sagas = await get_list_statement_result(db, stmt)
+    return sagas
+
+
 async def create_order(db: AsyncSession, order):
     """Persist a new order into the database."""
     movement = - float(order.number_of_pieces)
@@ -85,31 +93,49 @@ async def create_order(db: AsyncSession, order):
         number_of_pieces=order.number_of_pieces,
         description=order.description,
         id_client=order.id_client,
-        status_order=models.Order.STATUS_CREATED
+        status_order=models.Order.STATUS_DELIVERY_PENDING
     )
     db.add(db_order)
     await db.commit()
     await db.refresh(db_order)
+    db_saga = SessionLocal()
+    await create_sagas_history(db_saga, db_order.id_order, db_order.status_order)
+    await db_saga.close()
     data = {
         "id_order": db_order.id_order,
-        "id_client": db_order.id_client,
-        "movement": movement
+        "id_client": db_order.id_client
     }
-    # Crear evento con nueva order, indicando ID de cliente y cantidad de piezas.
     message_body = json.dumps(data)
-    routing_key = "order.created"
-    await publish(message_body, routing_key)
+    routing_key = "delivery.check"
+    await publish_command(message_body, routing_key)
     return db_order
 
 
-async def change_order_status(db: AsyncSession, order_id, status):
+async def change_order_status(db: AsyncSession, id, status):
     """Change order status in the database."""
-    db_order = await get_order(db, order_id)
+    db_order = await get_order(db, id)
     db_order.status_order = status
     await db.commit()
     await db.refresh(db_order)
     return db_order
-    
+
+
+async def create_sagas_history(db: AsyncSession, id_order, status):
+    """Persist a new sagas history into the database."""
+    db_sagahistory = models.SagasHistory(
+        id_order=id_order,
+        status=status
+    )
+    db.add(db_sagahistory)
+    await db.commit()
+    await db.refresh(db_sagahistory)
+    return db_sagahistory
+
+
+async def get_sagas_history(db: AsyncSession, id_order):
+    """Load sagas history from the database."""
+    return await get_sagas_history_by_order_id(db, id_order)
+
 
 async def create_piece(db: AsyncSession, piece):
     """Persist a new piece into the database."""
@@ -126,8 +152,8 @@ async def create_piece(db: AsyncSession, piece):
     }
     # Crear evento con nueva order, indicando ID de cliente y cantidad de piezas.
     message_body = json.dumps(data)
-    routing_key = "piece.created"
-    await publish(message_body, routing_key)
+    routing_key = "piece.needed"
+    await publish_event(message_body, routing_key)
     return db_piece
 
 

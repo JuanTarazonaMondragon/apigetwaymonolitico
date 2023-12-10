@@ -7,6 +7,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 from routers.router_utils import raise_and_log_error
+from consulService.consul_router import get_consul_service
 import json
 import requests
 
@@ -14,10 +15,23 @@ logger = logging.getLogger(__name__)
 
 public_key = ""
 
+async def isTherePublicKey():
+    if public_key == "":
+        return await get_public_key()
+    else:
+        return True
+
 async def get_public_key():
     global public_key
-    response = requests.get("http://192.168.18.11:8001/client/get/key")
-    public_key = response.text.strip('"').replace("\\n", "\n")
+    try:
+        ret = get_consul_service("_client._tcp")
+        response = requests.get(f"http://{ret['Address']}:{ret['Port']}/client/key")
+        if response.status_code == 200:
+            public_key = response.text.strip('"').replace("\\n", "\n")
+            return True
+        return False
+    except requests.RequestException as e:
+        return False
 
 def generar_claves():
     private_key = rsa.generate_private_key(
