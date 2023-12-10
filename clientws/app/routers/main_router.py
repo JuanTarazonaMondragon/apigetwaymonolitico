@@ -316,7 +316,7 @@ async def get_token(
 
 
 @router.get(
-    "/client/get/key",
+    "/client/key",
     summary="Retrieve key",
     responses={
         status.HTTP_200_OK: {
@@ -331,7 +331,7 @@ async def get_token(
 )
 async def get_public_key():
     """Retrieve public key"""
-    logger.debug("GET '/client/get/key' endpoint called.")
+    logger.debug("GET '/client/key' endpoint called.")
     return security.get_public_key()
 
 

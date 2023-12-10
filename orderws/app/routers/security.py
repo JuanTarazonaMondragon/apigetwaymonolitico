@@ -25,7 +25,7 @@ async def get_public_key():
     global public_key
     try:
         ret = get_consul_service("_client._tcp")
-        response = requests.get(f"http://{ret['Address']}:{ret['Port']}/client/get/key")
+        response = requests.get(f"http://{ret['Address']}:{ret['Port']}/client/key")
         if response.status_code == 200:
             public_key = response.text.strip('"').replace("\\n", "\n")
             return True
